@@ -8,10 +8,12 @@
 //Richiede la shield 485.
 //Diagnostica locale
 //PIN D9 USCITA: LED che replica il segnale di ingresso
+//PIN D5 USCITA: BRAKE forzato a 0
 
 //Definizione degli I/O
 #define SPEED    2
 #define SPEEDLED 9
+#define BRAKE    5
 
 //variabili globali
 volatile long startTBase;
@@ -23,6 +25,9 @@ void setup() {
   //configura I/O
   pinMode(SPEED,INPUT);
   pinMode(SPEEDLED, OUTPUT);
+  pinMode(BRAKE,OUTPUT);
+  analogWrite(BRAKE,LOW);
+  //avvia contatore ed interrupt
   startTBase=micros();
   counter=0;
   attachInterrupt(digitalPinToInterrupt(SPEED), rising, RISING);
@@ -42,9 +47,10 @@ void falling() {
 }
 
 void loop() {
+  //stampa e resetta il contatore ogni secondo
   if(micros()-startTBase> 1000000L) {
     Serial.print(counter);
-    Serial.println(" I/S");
+    Serial.println(" IMP/S");
     startTBase=micros();
     counter=0;
   }
