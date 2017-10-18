@@ -8,34 +8,22 @@
 //Richiede la shield 485.
 //Diagnostica locale
 //PIN D9 USCITA: LED che replica il segnale di ingresso
+//PIN D5 USCITA: BRAKE forzato a 0
 
 //Definizione degli I/O
 #define SPEED    2
 #define SPEEDLED 9
+#define BRAKE    5
 
 void setup() {
   //apre console 
   Serial.begin(250000);
-//  while(!Serial); //(solo per Leonardo)
   //configura I/O
   pinMode(SPEED,INPUT);
   pinMode(SPEEDLED, OUTPUT);
-//  attachInterrupt(digitalPinToInterrupt(SPEED), rising, RISING);
+  pinMode(BRAKE,OUTPUT);
+  analogWrite(BRAKE,LOW);
 }
-
-////ISR sul fronte positivo del segnale SPEED
-//void rising() {
-//  Serial.println(HIGH);
-//  digitalWrite(SPEEDLED,HIGH);
-//  attachInterrupt(digitalPinToInterrupt(SPEED), falling, FALLING);
-//}
-
-////ISR sul fronte negativo del segnale SPEED
-//void falling(){
-//  Serial.println(LOW);
-//  digitalWrite(SPEEDLED,LOW);
-//  attachInterrupt(digitalPinToInterrupt(SPEED), rising, RISING);  
-//}
 
 void loop() {
   int speed=digitalRead(SPEED);
