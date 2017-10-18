@@ -8,10 +8,12 @@
 //Richiede la shield 485.
 //Diagnostica locale
 //PIN D9 USCITA: LED che replica il segnale di ingresso
+//PIN D5 USCITA: BRAKE forzato a 0
 
 //Definizione degli I/O
 #define SPEED    2
 #define SPEEDLED 9
+#define BRAKE    5
 
 //variabili globali
 volatile long startON;
@@ -25,6 +27,8 @@ void setup() {
   //configura I/O
   pinMode(SPEED,INPUT);
   pinMode(SPEEDLED, OUTPUT);
+  pinMode(BRAKE,OUTPUT);
+  analogWrite(BRAKE,LOW);
   startON=micros();
   startOFF=micros();
   durationON=0;
