@@ -1,4 +1,4 @@
-#test folder
+#test folder: test vari sull'hw del trainer
 
 #test #1: Plotter sensore (valutazione dell'onda quadra del segnale di velocità)
           Campiona il segnale di velocità e replica lo stato sul plotter seriale 
