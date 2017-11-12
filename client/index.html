@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<!--
+/*
+ * This program is free software; you can redistribuite it and/or modify it
+ * under the terms of the GNU/General Pubblic License as published the Free software Foundation;
+ * either version 3 of the License, or (at your opinion) any later version
+ */
+-->
+<html>
+    <head>
+        <title>GoobleBike 2.0VR</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDdE0BdE4nlgFYJwbYztYgyYhs3YWzKUSs&sensor=false"></script -->
+        <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDdE0BdE4nlgFYJwbYztYgyYhs3YWzKUSs"></script>
+        <script type="text/javascript" src="lib/jquery-3.2.1.js"></script>
+
+        <script type="text/javascript" src="js/config/presetPercorsi.js"></script>
+        <script type="text/javascript" src="js/config/GBconst.js"></script>
+        <script type="text/javascript" src="js/config/undef.js"></script>
+        <script type="text/javascript" src="js/view/GBView.js"></script>
+        <script type="text/javascript" src="js/view/ProgressBar.js"></script>
+        <script type="text/javascript" src="js/view/BaseMeter.js"></script>
+        <script type="text/javascript" src="js/view/Landmeter.js"></script>
+        <script type="text/javascript" src="js/view/Speedometer.js"></script>
+        <script type="text/javascript" src="js/view/TraceView.js"></script>
+        <script type="text/javascript" src="js/model/MapTools.js"></script>
+        <script type="text/javascript" src="js/model/GooblePath.js"></script>
+        <script type="text/javascript" src="js/model/GooblePoint.js"></script>
+        <script type="text/javascript" src="js/model/GoobleIterator.js"></script>
+        <script type="text/javascript" src="js/model/GoobleButtons.js"></script>
+        <script type="text/javascript" src="js/model/GoobleInclinationFilter.js"></script>
+        <script type="text/javascript" src="js/model/GooblePanorama.js"></script>
+        <script type="text/javascript" src="js/model/SegmentManager.js"></script>
+        <script type="text/javascript" src="js/controller/dist_tools.js"></script>
+        <script type="text/javascript" src="js/controller/ErrorManager.js"></script>
+        <script type="text/javascript" src="js/controller/CB.js"></script>
+        <script type="text/javascript" src="js/controller/GBController.js"></script>
+        <script type="text/javascript" src="js/GBscript.js"></script>
+        
+        <link href="css/style.css" rel="stylesheet" type="text/css" />
+        <link href="img/favicon.ico" rel="shortcut icon" type="image/vnd.microsoft.icon" />
+    </head>
+    <body> 
+        <div id="main">
+            <!-- Splash screen con il logo posizionato sopra la mappa -->
+            <img id="splash"  src="img/logo_bevel_003.png" /><!-- z-index: 2 -->
+            <div id="splash2" ><!-- z-index: 3 -->
+                <p id="splash2text"></p>
+            </div>
+            <img id="empty" src="img/empty.png" /><!-- z-index: 4 -->
+            <!-- map canvas -->
+            <!-- attenzione, il parametro height è fissato dal metodo GoobleView.setStatusModeView -->
+            <div  id="map"></div>
+            <div id="trace"><img src="img/empty.png" /></div><!-- z-index: 4 -->
+        </div>
+        <div style="float:left; width:99%; height:100px; background-color: #ececc8; " id="bottom_panel">
+            <div style="float:left; width:0%; height:100px;" id="control_panel">
+                <span id="bottoni" >
+                    <input value="START" id="startButton" onclick="app.autorunBySpeed()" type="button" style="display:none;  float:left; width:50%; height:100px;" ALIGN="CENTER"/>
+                    <input value="NEW ROUTE" id="newRoute" onclick="app.clearRoute()" type="button" style="display:none;  float:left; width:50%; height:100px;" ALIGN="CENTER"/>
+                </span>
+            </div>
+            <div style="float:left; width:100%; height:95px;" id="cruscotto_or_preload">
+                <div id="logo" style="float:left; height:95px; width:10%">
+                    <img src="img/logo_bevel_003.png" style="height:50px; padding-top:20px; padding-left:10px;">
+                </div>
+                <div style="display: none;  float:left; width:89%; height:100px;" id="cruscotto">
+                    <div id="cruscotto_info" style="float:left;  width:24%; padding-top:13px; padding-left:10px; font-family: sans-serif; font-size: 1.3em;"></div>
+                    <div id="cruscotto_tools" style="float:left; width:75%; ">
+                         <!-- display progress bar -->
+                        <span id="progressbar"   style=" float:left; width:20%; height:33px; margin-top:33px" >
+                            <canvas id="progress" width="206" height="33"></canvas>
+                        </span>
+                        <span id="pendenza" style="float:left; width:20%; height:100px; padding-left: 3px; ;text-align: center;">
+                             <canvas id="canvas_pendenza" width="200" height="100"></canvas>
+                        </span>
+                        <span id="tachimetro" style="float:left; width:20%; height:100px; text-align: center;">
+                            <canvas id="canvas_tachimetro" width="200" height="100"></canvas>
+                        </span>
+                        <span id="contakm" style="float:left; width:19%; height:50px; text-align: center; margin-top:13px; font-family: sans-serif; font-size: 1.6em;"></span>
+                        <span id="toNextImg" style="float:left; width:19%; height:50px; text-align: center; margin-top:8px; font-family: sans-serif; font-size: 1.6em"></span>
+                    </div>
+                </div>
+                <div style="float:left; width:89%; height:89px; padding-left:10px;" id="preload">
+                    <div id="preload_info" style="margin-top:13px; font-family: sans-serif; font-size: 1.3em;"></div>
+                    <div style="display:none; float:left; width:30%; height:100px; padding-left:10px;text-align: right;" id="preload_form">
+                        <br>from
+                        <input id="from1" size="40" value="Via Siepelunga, 2 Bologna" /><br>
+                        to
+                        <input id="to1" size="40" value="Via Santa Liberata Bologna" /><br>
+                        <input value="Make route" id="route1"  onclick="app.makeRoute(document.getElementById('from1').value, document.getElementById('to1').value)" type="button"/>
+                    </div>
+                    <div style="display:none; float:left; width:60%; height:100px; padding-left:10px;" id="preload_buttons"></div>
+                </div>
+            </div>
+        </div><!-- end bottom panel -->
+
+        <!-- pannello di stato -->
+        <div id="status_panel" style="display:none; ">
+            <div id="cruscotto_develop" style="display: block; clear: both; float:left; width: 100%; height:50px; padding-left: 25%; text-align: center"></div>
+            <div id="status_message"></div>
+            <form id="control_form">
+                from
+                <input id="from" size="17" value="Via Siepelunga, 2 Bologna" />
+                to
+                <input id="to" size="17" value="Via Santa Liberata Bologna" /><br>
+                <input value="Make route" id="route"  onclick="app.makeRoute(document.getElementById('from').value, document.getElementById('to').value)" type="button"/>
+                <input value="Auto run" id="autorun" onclick="app.autoRun()" type="button"/>
+                <input value="Ride" id="ride" onclick="app.bikeRideStart()" type="button"/>
+                <input value="Stop" id="stop" onclick="app.bikeRideStop()" type="button"/>
+                <input value="Restart" id="restart" onclick="app.clearRoute()" type="button"/><br>
+                <input value="Filtra" id="filtra" onclick="app.filtraPath()" type="button"/> i dati<br>
+            </form>
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>N</th>
+                        <th>Lat</th>
+                        <th>Lng</th>
+                        <th>Pov</th>
+                        <th>Dst</th>
+                        <th>Elv</th>
+                        <th>Inc</th>
+                        <th>Dst TOT</th>
+                        <th>Elv2</th>
+                    </tr>
+                </thead>
+                <tbody id="pointTableBody"></tbody>
+            </table>
+            <div id="Lat"></div>
+            <div id="Lng"></div>
+            <div id="Elv"></div>
+            <div id="Pov"></div>
+            <div id="Inc"></div>
+            <div id="Dst"></div>
+            <div id="Tot"></div>
+            <div id="Elv2"></div>
+            <div id="array">
+                <table border="1">
+                    <thead>
+                        <tr>
+                            <th>N</th>
+                            <th>Lat</th>
+                            <th>Lng</th>
+                            <th>Pov</th>
+                            <th>Dst</th>
+                            <th>Elv</th>
+                            <th>Inc</th>
+                            <th>Dst TOT</th>
+                            <th>Elv2</th>
+                        </tr>
+                    </thead>
+                    <tbody id="arrayTableBody"></tbody>
+                </table>
+            </div>
+        </div>  
+    </body>
+</html>
