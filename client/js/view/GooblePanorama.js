@@ -35,23 +35,36 @@ class GooblePanorama{
     refresh(point,dir){
         this.panorama.setPosition(point);
         this.panorama.setPov({
-            heading: dir,
-            pitch: 0,
+//            heading: dir,
+//            pitch: 0,
+                heading: app.currentHeading+this.curPoint.pov,
+                pitch: app.currentPitch,
             zoom: 1
         });
         var pos=this.panorama.getLocation().latLng;
-        pos=this.panorama.getLinks();
-//        app.currentPoint=pos;
+//        pos=this.panorama.getLinks();
+////        app.currentPoint=pos;
 //                app.log('panorama.update.oddIsVisible pov='+this.nextPoint.pov+"ODD -> "+JSON.stringify(this.panoramaOdd.getLinks()));
-        app.log('panorama.refresh pov='+dir+" point = "+JSON.stringify(point)+" pos = "+JSON.stringify(pos));
+//        app.log('panorama.refresh pov='+dir+" point = "+JSON.stringify(point)+" pos = "+JSON.stringify(pos));
+        app.log('panorama.refresh pov='+dir+" point = "+JSON.stringify(point));
+    }
+
+    refreshPov(){
+        this.panorama.setPov({
+            heading: app.currentHeading+this.curPoint.pov,
+            pitch: app.currentPitch,
+            zoom: 1
+        });
+        app.log('panorama.refreshPov head='+app.currentHeading+" pitch = "+app.currentPitch);
     }
 
     setPanorama() {
         var panoramaOptions = {
             position: new google.maps.LatLng(this.curPoint.lat, this.curPoint.lng),
             pov: {
-                heading: this.curPoint.pov,
-                pitch: 0,
+//                heading: this.curPoint.pov,
+                heading: app.currentHeading,
+                pitch: app.currentPitch,
                 zoom: 1
             },
             scrollwheel: false
