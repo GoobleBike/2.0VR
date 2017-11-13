@@ -11,6 +11,7 @@ class GBController{
         //il modo può essere DEVELOP o PRODUCTION a seconda del valore della costatnte GOOBLE_CONTROL_MODE
         this.mode=GOOBLE_CONTROL_MODE;
         this.task=GB_BOEXP;
+        this.presetPercorsi=PRESET_PERCORSI;
         this.em=new ErrorManager(LOGGERENABLE,LOGAPI);//error manager  
         this.view=null;//view
         //model
@@ -183,7 +184,6 @@ class GBController{
      * @returns {Boolean}
      */
     bikeRideStart() {
-        this.trace.setMap(this.currentPoint);
         this.view.swapCruscottoOnPreloadOff();
         //passa in street view
         //inizializza iteratore
@@ -195,6 +195,7 @@ class GBController{
             var curPoint=this.moveToNext(this.rideIterator);
             this.currentPoint=new google.maps.LatLng(curPoint.lat, curPoint.lng);
             this.currentDir=curPoint.pov;
+            this.trace.setMap(this.currentPoint);
             var now=new Date().getTime();
             this.ultimoIntertempo=0;
             this.actualSpeed=0;
@@ -361,8 +362,8 @@ moveNextDistance(distance) {
         clearInterval(this.speedPoller);
           this.goobleButtons.action(this.goobleButtons.STOP);
 //          this.clearRoute();//portato dentro a loadSegment
-//          $("#splash2text").html("Complimenti!!!<br>Hai completato il percorso:<br>"+presetPercorsi[this.currentSegment][2]);
-          $("#splash2text").html("Congratulations !!! <br> You've completed the path:<br>"+presetPercorsi[this.segManager.currentSegment][2]);
+          $("#splash2text").html("Congratulations !!! <br> You've completed the path:<br>"+
+                  this.presetPercorsi[this.segManager.currentSegment][2]);
           $("#splash2").show();
 //          $("#splash").show(2000);
 //          this.view.msgFinePath();
@@ -389,9 +390,9 @@ moveNextDistance(distance) {
         app.askMap(DEFAULT_MAP_ORIGIN);
         //sovrapponi logo
         app.view.showSplash();
-        if (typeof presetPercorsi != 'undefined' && presetPercorsi.length>0) {
+        if (typeof app.presetPercorsi != 'undefined' && app.presetPercorsi.length>0) {
     //      app.em.debug("Presente");
-            app.view.mostraPresetPercorsi(presetPercorsi)
+            app.view.mostraPresetPercorsi(app.presetPercorsi)
         }
         app.log("running...");
         app.segManager.startSegment();
