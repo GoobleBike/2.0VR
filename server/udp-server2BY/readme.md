@@ -1,1 +1,1 @@
-# script udp server seriale lato PC
+# script udp server lato PC (controller singolo)
