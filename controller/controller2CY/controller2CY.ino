@@ -110,7 +110,7 @@ void loop() {
     counter=0;                        //resetta contatore impulsi
     //trasmissione
     digitalWrite(COMLED,HIGH);        //diagnostica on
-    snprintf(txBuf,sizeof(txBuf), "V%02d", bkspeed);
+    snprintf(txBuf,txBufLen, "V%02d", bkspeed);
     Bridge.put("speed",String(txBuf));
     if(debug){
       Serial.println(txBuf);
