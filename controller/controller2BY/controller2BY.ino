@@ -33,10 +33,6 @@
 //definizioni costanti
 #define TBASE 1000000L  //time base 1 secondo per calcolo velocità
 #define TSEND 250000L   //time base 250 mS per trasmissione
-#define WT_1ST_CH 0     //automa rx: attesa primo carattere
-#define WT_2ND_CH 1     //automa rx: attesa secondo carattere
-#define WT_CR     2     //automa rx: attesa CR
-#define WT_LF     3     //automa rx: attesa LF
 
 //variabili globali
 volatile long counter;      //contatore impulsi
