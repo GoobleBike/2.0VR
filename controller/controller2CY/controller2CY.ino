@@ -111,7 +111,7 @@ void loop() {
     //trasmissione
     digitalWrite(COMLED,HIGH);        //diagnostica on
     snprintf(txBuf,sizeof(txBuf), "V%02d", bkspeed);
-    Bridge.put("spdang",String(txBuf));
+    Bridge.put("speed",String(txBuf));
     if(debug){
       Serial.println(txBuf);
     }
