@@ -11,7 +11,7 @@
 //PIN D2 INGRESSO: onda quadra (duty cycle 50%) dal trainer
 //PIN A0 INGRESSO: angolazione dello sterzo valore analogico 0-1023
 //PIN D5 USCITA: intensità di frenata PWM 0-255
-//PIN D6 USCITA: switch di debug: logica negata 1 no debug (default), 0 debug
+//PIN D6 INGRESSO: switch di debug: logica negata 1 no debug (default), 0 debug
 //Richiede la shield 485.
 //Diagnostica locale
 //PIN D9 USCITA: LED che indica la velocità
