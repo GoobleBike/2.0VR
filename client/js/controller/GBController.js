@@ -47,6 +47,9 @@ class GBController{
         this.lastClickTime=0;
         //velocità corrente
         this.actualSpeed=0;
+        this.currentHeading=0;
+        this.currentPitch=0;
+        this.currentDir=0;
         // timer per riconoscere la fermata
         this.timerFermo;
         //la pendenza corrente
@@ -378,12 +381,61 @@ moveNextDistance(distance) {
     }
     return percorsoFinito;
 };
+
+/*
+ * develop tools
+ */
+
+    incSpeed(){
+       this.actualSpeed++; 
+    }
+
+    decSpeed(){
+        if (this.actualSpeed>0){
+            this.actualSpeed--; 
+        }
+    }
+    
+    upPitch(){
+        if(this.currentPitch<90){
+            this.currentPitch++;
+            this.panorama.refreshPov();
+        }
+    }
+
+    dnPitch(){
+        if(this.currentPitch>-90){
+            this.currentPitch--;
+            this.panorama.refreshPov();
+        }
+    }
+
+    rtHeading(){
+        if(this.currentHeading<180){
+            this.currentHeading++;
+            this.panorama.refreshPov();
+        }
+    }
+
+    ltHeading(){
+        if(this.currentHeading>-180){
+            this.currentHeading--;
+            this.panorama.refreshPov();
+        }
+    }
+
+/*
+ * end develop tools
+ */
+
+
     
     /*
      * Static methods
      */
     
     static run(){
+        alert("Per aumentare e diminuire velocità: tasti + e -\nPer ruotare la vista: i quattro tasti freccia")
         app.setup();
         //carica la mappa
 //        app.log("Chiamata a loadMap");
@@ -396,6 +448,9 @@ moveNextDistance(distance) {
         }
         app.log("running...");
         app.segManager.startSegment();
+        //capture keydown
+        $( "body" ).on( "keydown", CB.keydownHandler);
+        
     }
     
    

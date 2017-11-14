@@ -84,41 +84,74 @@ class CB{
 
    };
    
-static pollSpeedFromDefaulUrl(){
-    app.actualSpeed=5;
-    return;
-    $.ajax(URL+parseInt(app.pendenza), {
-        dataType: 'json',
-        success: function(msg, status, xhr) {
-            if (msg.ck=='OK'){
-                if (msg.resp.v=="UNKNOWN") {
-                    app.actualSpeed=0;
+    static pollSpeedFromDefaulUrl(){
+//        app.actualSpeed=5;
+        return;
+        $.ajax(URL+parseInt(app.pendenza), {
+            dataType: 'json',
+            success: function(msg, status, xhr) {
+                if (msg.ck=='OK'){
+                    if (msg.resp.v=="UNKNOWN") {
+                        app.actualSpeed=0;
+                    }
+                    else {
+                        app.actualSpeed = parseInt(msg.resp.v);//km/h
+                        //TODO:notifica in cruscotto
+                    }
                 }
-                else {
-                    app.actualSpeed = parseInt(msg.resp.v);//km/h
+                else{
+                    app.actualSpeed=0;
                     //TODO:notifica in cruscotto
                 }
             }
-            else{
-                app.actualSpeed=0;
-                //TODO:notifica in cruscotto
-            }
+        });
+    }
+
+
+
+    static autoMoveBySpeed() {
+    //    console.log(goobleControl.percorsoAttivo?'autoMove-attivo':'autoMove-NONattivo')
+      if (app.percorsoAttivo){
+        //programma click
+        var distanza = (app.actualSpeed *1.5)* VIEW_REFRESH_TIME / 1000 // VIEW_REFRESH_TIME è in msec
+        var percorsoFinito=app.moveNextDistance(distanza);
+    //        this.autoTimer = setTimeout(this.autoMove.bind(this), 2000);
+            // this.autoTimer = setTimeout(this.autoMove.bind(this), tempo);
+      }
+    }
+
+    static keydownHandler( event ) {
+        app.log( event.type + ": " +  event.which );
+        switch(event.which){
+            case 189: //- tastiera alfanumerica
+            case 109: //- tastierino numerico
+                app.decSpeed();
+                break;
+            case 187: //+ tastiera alfanumerica
+            case 107: //+ tastierino numerico
+                app.incSpeed();
+                break;
+            case 38: //up
+                app.upPitch();
+                break;
+            case 40: //down
+                app.dnPitch();
+                break;
+            case 39: //right
+                app.rtHeading();
+                break;
+            case 37: //left
+                app.ltHeading();
+                break;
+            case 65: //A
+                break;
+            case 83: //S
+                break;
+            case 68: //D
+                break;
+            default: //
+                break;
         }
-    });
-}
-
-
-
-static autoMoveBySpeed() {
-//    console.log(goobleControl.percorsoAttivo?'autoMove-attivo':'autoMove-NONattivo')
-  if (app.percorsoAttivo){
-    //programma click
-    var distanza = (app.actualSpeed *1.5)* VIEW_REFRESH_TIME / 1000 // VIEW_REFRESH_TIME è in msec
-    var percorsoFinito=app.moveNextDistance(distanza);
-//        this.autoTimer = setTimeout(this.autoMove.bind(this), 2000);
-        // this.autoTimer = setTimeout(this.autoMove.bind(this), tempo);
-  }
-}
-
+    }
     
 }
