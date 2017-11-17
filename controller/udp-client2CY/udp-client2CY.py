@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #udp client per yun
-#2CY comunica su UDP, velocit‡/pendenza
+#2CY comunica su UDP, velocit√†/pendenza
 import socket
 import time
 import select
@@ -83,6 +83,8 @@ while True:
             strSlope=data[0:2]
             try:
                 slope=int(strSlope)
+                if slope<0:
+                    slope=0
                 if debug:
                     print "ricevuta slope",slope
             except ValueError:
