@@ -11,6 +11,8 @@ from bridgeclient import BridgeClient
 #rilascia socket in uscita
 def closeSock():
     clientSock.close()
+    log.write("process terminated\n")
+    log.close()
 atexit.register(closeSock)
 #linea di comando: python udp-client2BY.py <remoteip> <remoteport> <debug>
 #sys.argv[0]: udp-client2BY.py
@@ -35,23 +37,34 @@ angle = +000   #angolo
 #debug: diagnostica locale
 if debug:
     print "udp-client 2BY"
-#apre la connessione con il bridge
-try:
-    bridge=BridgeClient()
-    if debug:
-        print "connessione con bridge ok"
-except Exception:
-    if debug:
-        print "errore di connessione con bridge"
-    exit(1)
-#apre la connessione udp
-try:
-    clientSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    serverSock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-except socket.error:
-    if debug:
-        print "errore apertura di socket"
-    exit(1)
+#log su file
+log = open("log-udp-client.txt","w",0)
+log.write("starting script\n")
+#tenta di aprire la connessione con il bridge
+bridgeConnect = False
+while bridgeConnect == False:
+    try:
+        bridge=BridgeClient()
+        bridgeConnect = True
+        if debug:
+            print "connessione con bridge ok"
+    except Exception:
+        log.write("bridge cliente connection error\n")       
+        if debug:
+            print "errore di connessione con bridge"
+log.write("bridge connected\n")
+udpConnect = False
+#tenta di aprire la connessione udp
+while udpConnect == False:
+    try:
+        clientSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        clientSock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        udpConnect = True
+    except socket.error:
+        log.write("socket creation error\n")
+        if debug:
+            print "errore apertura di socket"
+log.write("socket client created\n")
 #loop di comunicazione
 while True:
     #ogni 250 mS
@@ -65,6 +78,7 @@ while True:
             if debug:
                 print "read speed/angle from bridge",strSpdAng
         except Exception:
+            log.write("bridge client read error\n")
             strSpdAng="00+000"
             if debug:
                 print "errore di lettura bridge, forzo 00+000"
@@ -74,6 +88,7 @@ while True:
             if debug:
                 print "sent message", msg,"to",remoteIP,port
         except socket.error:
+            log.write("udp client write error"); 
             if debug:
                 print "write error"
     if clientSock in r:
@@ -85,23 +100,30 @@ while True:
             strSlope=data[0:2]
             try:
                 slope=int(strSlope)
+                if slope<0:
+                    slope=0
                 if debug:
                     print "ricevuta slope",slope
             except ValueError:
-                strSlope="00"
+                slope = 0
+                log.write("dato P non numerico")
                 if debug:
                     print "dato non numerico, forzo 00"
             try:
-                bridge.put("slope",strSlope)
+                msg=str(slope).zfill(2)
+                bridge.put("slope",msg)
                 if debug:
                     print "slope trasferita a bridge", strSlope
             except Exception:
+                log.write("bridge client write error\n")
                 if debug:
                     print "errore di scrittura bridge"              
         except socket.error:
+            log.write("socket client read error\n")
             if debug:
                 print "read error"
     if clientSock in x:
         #eccezione
+        log.write("socket exception\n")
         if debug:
             print "socket error"
