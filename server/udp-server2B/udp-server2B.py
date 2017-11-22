@@ -17,7 +17,7 @@ atexit.register(closeSock)
 #sys.argv[2]: <localport>
 #sys.argv[3]: True = debug, False no debug
 #TEMPORANEO: simulazione parametri per debug in Python IDE RIMUOVERE!!!
-sys.argv = [sys.argv[0], "0.0.0.0",40000,True]
+#sys.argv = [sys.argv[0], "0.0.0.0",40000,True]
 #FINE TEMPORANEO!!!
 if len(sys.argv)<4:
     print "parametri mancanti"
