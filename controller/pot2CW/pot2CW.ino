@@ -13,8 +13,10 @@
 #include <ESP8266WiFi.h>
 #include <WiFiUdp.h>
 //SSID of your network
-char ssid[] = "gooble"; //SSID of your Wi-Fi router
-char pass[] = "Loop-Gooble"; //Password of your Wi-Fi router
+char ssid[] = "FASTWEB-1-D0B433"; //SSID of your Wi-Fi router
+char pass[] = "EBE1975E69"; //Password of your Wi-Fi router
+//char ssid[] = "gooble"; //SSID of your Wi-Fi router
+//char pass[] = "Loop-Gooble"; //Password of your Wi-Fi router
 
 int remotePort = 40000;                   //Porta di servizio
 //IPAddress remoteIP={nnn,nnn,nnn,nnn4};  //Numero IP del Server
@@ -24,8 +26,8 @@ IPAddress remoteIP={192,168,1,64};        //Numero IP del Server debug
 WiFiUDP Udp;
 
 //range del potenziometro
-#define MIN_INP  4
-#define MAX_INP  992
+#define MIN_INP  2
+#define MAX_INP  982
 #define MIN_OUT  -135
 #define MAX_OUT  +135
 
