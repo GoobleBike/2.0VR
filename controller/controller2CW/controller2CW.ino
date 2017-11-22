@@ -22,14 +22,15 @@
 #include <WiFiUdp.h>
 #include <stdio.h>
 //network config
-char ssid[] = "gooble"; //SSID of your Wi-Fi router
-char pass[] = "Loop-Gooble"; //Password of your Wi-Fi router
+//SSID of your network
+//char ssid[] = "********"; //SSID of your Wi-Fi router
+//char pass[] = "********"; //Password of your Wi-Fi router
+char ssid[] = "gooble"; //MFR Wi-Fi router
+char pass[] = "Loop-Gooble"; //Password MFR Wi-Fi router
 
 int remotePort = 40000;                   //Porta di servizio
-//IPAddress remoteIP={nnn,nnn,nnn,nnn4};  //Numero IP del Server
-//TEMPORANEO!!!
-IPAddress remoteIP={192,168,1,64};        //Numero IP del Server debug
-//FINE TEMPORANEO!!!
+//IPAddress remoteIP={nnn,nnn,nnn,nnn};        //Numero IP of your Server
+IPAddress remoteIP={192,168,0,102};  //Numero IP MFR Server
 WiFiUDP Udp;
 
 //Definizione degli I/O
