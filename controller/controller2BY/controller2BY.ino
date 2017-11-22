@@ -1,6 +1,6 @@
 //The Gooble Bike 2.0VR!
 //Versione BY
-//HW Arduino YUN 
+//HW Arduino Yun
 //richiede lo script udp-client2BY.py in autoavvio sul lato Linino
 //Campiona la velocità con interrupt (senza filtri antirimbalzo)
 //Campiona il valore analogico dello sterzo
@@ -137,12 +137,13 @@ void loop() {
       Serial.print(" ");
       Serial.println(rxBuf);
     }
+    //modifica pend solo se è valido
     if(nRxChar>0){
       if((rxBuf[0]>='0')&&(rxBuf[0]<='9')){
         pend=(rxBuf[0] & 0x0F)*10;
-      }
-      if((rxBuf[1]>='0')&&(rxBuf[1]<='9')){
-        pend=pend+ (rxBuf[1] & 0x0F);
+        if((rxBuf[1]>='0')&&(rxBuf[1]<='9')){
+          pend=pend+ (rxBuf[1] & 0x0F);
+        }
       }
     }  
     digitalWrite(COMLED,LOW);         //diagnostica off
