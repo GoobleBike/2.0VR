@@ -1,62 +1,68 @@
 //The Gooble Bike 2.0VR!
-//Versione BY
-//HW Arduino Yun
-//richiede lo script udp-client2BY.py in autoavvio sul lato Linino
+//Versione CW 
+//HW Wemos D1 R2
 //Campiona la velocità con interrupt (senza filtri antirimbalzo)
-//Campiona il valore analogico dello sterzo
-//Trasmette i dati su UDP via Bridge ogni 250 mS
-//Riceve la pendenza da UDP via Bridge ogni 250 mS
+//NON Campiona il valore analogico dello sterzo; prevede la presenza di un controller dedicato
+//Trasmette la velocità su UDP ogni 1 S
+//Riceve la pendenza da UDP ogni 1 S
 //Attua la pendenza
 //Segnali di I/O
-//PIN D2 INGRESSO: onda quadra (duty cycle 50%) dal trainer
-//PIN A0 INGRESSO: angolazione dello sterzo valore analogico 0-1023
-//PIN D5 USCITA: intensità di frenata PWM 0-255
-//PIN D6 INGRESSO: switch di debug: logica negata 1 no debug (default), 0 debug
-//Richiede la shield 485.
+//PIN D1 INGRESSO: onda quadra (duty cycle 50%) dal trainer
+//PIN D3 USCITA: intensità di frenata PWM 0-255
+//PIN D5 INGRESSO: switch di debug: logica negata 1 no debug (default), 0 debug
+//Richiede la shield 485 per Wemos D1 R2.
 //Diagnostica locale
-//PIN D9 USCITA: LED che indica la velocità
-//PIN D3 USCITA: LED che indica la frenata
-//PIN D12 USCITA: LED che segnala la comunicazione
-//Diagnostica su seriale se debug abilitato
+//PIN D8 USCITA: LED che indica la velocità
+//PIN D7 USCITA: LED che indica la frenata
+//PIN D6 USCITA: LED che segnala la comunicazione
+//N.B.: le posizioni dei pin sono diverse rispetto allo standard Arduino UNO
+//vedi definizioni I/O per le corrispondenze
 //14/11/2017
-#include <Bridge.h>
+#include <ESP8266WiFi.h>
+#include <WiFiUdp.h>
 #include <stdio.h>
+//network config
+//SSID of your network
+//char ssid[] = "********"; //SSID of your Wi-Fi router
+//char pass[] = "********"; //Password of your Wi-Fi router
+char ssid[] = "gooble"; //MFR Wi-Fi router
+char pass[] = "Loop-Gooble"; //Password MFR Wi-Fi router
+
+int remotePort = 40000;                   //Porta di servizio
+//IPAddress remoteIP={nnn,nnn,nnn,nnn};        //Numero IP of your Server
+IPAddress remoteIP={192,168,0,102};  //Numero IP MFR Server
+WiFiUDP Udp;
+
 //Definizione degli I/O
-#define BKSPEED  2      //segnale di ingresso velocità
-#define BRAKE    5      //segnale di uscita freno
-#define SPEEDLED 3      //LED segnalazione velocità
-#define BRAKELED 9      //LED segnalazione freno
-#define COMLED  12      //LED segnalazione comunicazione
-#define POT     A0      //Potenziometro angolazione
-#define DEBUG    6      //pin debug 1=debug default, 0= no debug
+#define BKSPEED  D1      //segnale di ingresso velocità    pin 3 (era pin 2)
+#define BRAKE    D3      //segnale di uscita freno (PWM)   pin 5 (stessa posizione)
+#define SPEEDLED D8      //LED segnalazione velocità (PWM) pin 10(era pin 3)
+#define BRAKELED D7      //LED segnalazione freno (PWM)    pin 9 (stessa posizione)
+#define COMLED   D6      //LED segnalazione comunicazione  pin 8  (era pin 12)
+#define DEBUG    D5      //pin debug 1=debug, 0= no debug  pin 7  (era pin 6)
 
 //definizioni costanti
 #define TBASE 1000000L  //time base 1 secondo per calcolo velocità
-#define TSEND 250000L   //time base 250 mS per trasmissione
 
 //variabili globali
 volatile long counter;      //contatore impulsi
 long startTBase;            //t iniziale per base dei tempi calcolo velocità
-long startTSend;            //t iniziale per base dei tempi comunicazione
-int bkspeed;                  //misura ingresso velocità
-int angle;                  //misura ingresso angolazione
+int bkspeed;                 //misura ingresso velocità
 int pend;                   //valore pendenza in %
 int brake;                  //valore uscita di frenata
 int debug;                  //stato di debug
-char txBuf[]="00 +000";     //buffer di trasmissione
+char txBuf[]="V00";         //buffer di trasmissione
 int  txBufLen=sizeof(txBuf);//lunghezza del buffer di tx
 char rxBuf[]="00";          //buffer di ricezione
-int  rxBufLen=sizeof(txBuf);//lunghezza del buffer di rx
-int  nRxChar;               //numero caratteri letti
+int  rxBufLen=sizeof(rxBuf);
+int  nRxChar;
 
 void setup() {
-  //apre canali di console  e di bridge
+  //apre console 
   Serial.begin(250000);
   delay(10);
-  Bridge.begin();
-  delay(10);
-  
-  //configura I/O
+
+ //configura I/O
   pinMode(BKSPEED,INPUT);
   pinMode(SPEEDLED, OUTPUT);
   analogWrite(SPEEDLED,LOW);
@@ -67,26 +73,43 @@ void setup() {
   pinMode(COMLED,OUTPUT);
   digitalWrite(COMLED,LOW);
   pinMode(DEBUG,INPUT_PULLUP);
-  
+
   //inizializza variabili di stato
   bkspeed=0;
-  angle=0;
   pend=0;
   brake=0;
-  
+
   //imposta debug (logica negativa 1=no, 0=si)
   debug=!digitalRead(DEBUG);
   //TEMPORANEO!!!
   debug=1;
   //FINE TEMPORANEO!!!
   if(debug){
-    Serial.println("Controller 2BY Debug mode");
+    Serial.println("Controller 2CW Debug mode");
   }
-  
+
   //inizializza timers
-  startTSend=micros();
   startTBase=micros();
-  
+
+  // Connect to Wi-Fi network
+  if(debug){
+    Serial.println();
+    Serial.println();
+    Serial.print("Connecting to...");
+    Serial.println(ssid);
+  }  
+  WiFi.begin(ssid, pass);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    if(debug) {
+      Serial.print(".");
+    }
+  }
+  if(debug){
+    Serial.println("");
+    Serial.println("Wi-Fi connected successfully");
+  }
+
   //avvia contatore ed interrupt
   counter=0;
   attachInterrupt(digitalPinToInterrupt(BKSPEED), rising, RISING);
@@ -106,7 +129,8 @@ void falling() {
 }
 
 void loop() {
-  //gestione velocità
+  
+  //gestione velocità  trasmissione e ricezione
   if(micros()-startTBase>= TBASE) {   //verifica se time base 1S scaduto
     int c=constrain(counter,0,86);    //limita conteggio in range
     bkspeed=map(c,0,86,0,39);       //converte in velocità [km/h]  
@@ -114,25 +138,18 @@ void loop() {
     analogWrite(SPEEDLED,speedLed);  
     startTBase=micros();              //riavvia timebase
     counter=0;                        //resetta contatore impulsi
-  }
-  
-  //gestione angolo
-  int a=analogRead(A0);               //legge valore analogico
-  angle=map(a,0,1023,-135,135);       //converte in angolo [gradi]
-  
-  //invio/ricezione dati
-  if(micros()-startTSend>= TSEND) {   //verifica se time base 250 mS scaduto
-    startTSend=micros();              //riavvia timebase
     digitalWrite(COMLED,HIGH);        //diagnostica on
-    //invio
-    snprintf(txBuf,txBufLen, "%02d %+04d", bkspeed,angle);
-    Bridge.put("spdang",String(txBuf));
+    snprintf(txBuf,txBufLen, "V%02d", bkspeed);
+    Udp.beginPacket(remoteIP,remotePort);
+    Udp.write(txBuf,txBufLen);
+    int ris=Udp.endPacket();
+    digitalWrite(COMLED,LOW);         //diagnostica off
+  }
+  //ricezione
+  if(Udp.parsePacket()>0) {
+    nRxChar=Udp.read(rxBuf,rxBufLen);
     if(debug){
-      Serial.println(txBuf);
-    }
-    //ricezione
-    nRxChar=Bridge.get("slope",rxBuf,rxBufLen);
-    if(debug){
+      rxBuf[rxBufLen]=0;
       Serial.print(nRxChar);
       Serial.print(" ");
       Serial.println(rxBuf);
@@ -146,9 +163,7 @@ void loop() {
         }
       }
     }  
-    digitalWrite(COMLED,LOW);         //diagnostica off
-  }
-  
+  }  
   //attuazione freno
   if(bkspeed<=1){                       //per sicurezza spegne freno se rullo fermo
     pend=0;

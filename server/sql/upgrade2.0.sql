@@ -49,7 +49,7 @@ ALTER TABLE `stato` ENGINE = MySQL;
 INSERT INTO `stato` (`who`, `id`, `what`, `how`, `ts`) VALUES
 ('gb', 0, 'a', '000', CURRENT_TIMESTAMP),
 ('wc', 0, 'lat', '44.493733',  CURRENT_TIMESTAMP),
-('wc', 0, 'lng', ',11.342990',  CURRENT_TIMESTAMP),
+('wc', 0, 'lng', '11.342990',  CURRENT_TIMESTAMP),
 ('wc', 0, 'pov', '000',  CURRENT_TIMESTAMP);
 
 --

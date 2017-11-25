@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #udp client per yun
-#2BY comunica su UDP, velocità/angolo/pendenza
+#2CY comunica su UDP, velocità/pendenza
 import socket
 import time
 import select
@@ -10,9 +10,9 @@ sys.path.insert(0,'/usr/lib/python2.7/bridge/')
 from bridgeclient import BridgeClient
 #rilascia socket in uscita
 def closeSock():
-    clientSock.close()
     log.write("process terminated\n")
     log.close()
+    clientSock.close()
 atexit.register(closeSock)
 #linea di comando: python udp-client2BY.py <remoteip> <remoteport> <debug>
 #sys.argv[0]: udp-client2BY.py
@@ -32,11 +32,11 @@ else:
     if debug:
         print sys.argv
 #variabili
-speed = 0      #velocita       
-angle = +000   #angolo
+speed = 0
+angle = +000
 #debug: diagnostica locale
 if debug:
-    print "udp-client 2BY"
+    print "udp-client 2CY"
 #log su file
 log = open("log-udp-client.txt","w",0)
 log.write("starting script\n")
@@ -58,7 +58,7 @@ udpConnect = False
 while udpConnect == False:
     try:
         clientSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        clientSock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        serverSock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         udpConnect = True
     except socket.error:
         log.write("socket creation error\n")
@@ -67,32 +67,30 @@ while udpConnect == False:
 log.write("socket client created\n")
 #loop di comunicazione
 while True:
-    #ogni 250 mS
-    time.sleep(.25)
+    #ogni 1 S
+    time.sleep(1)
     #verifica se eventi di r(ead), w(rite), (e)x(ception)
     r,w,x = select.select([clientSock],[clientSock],[clientSock])
     if clientSock in w:
-        #trasmette vel e ang al server
+        #trasmette
         try:
-            strSpdAng = bridge.get("spdang")
+            strSpeed = bridge.get("speed")
             if debug:
-                print "read speed/angle from bridge",strSpdAng
+                print "read speed from bridge",strSpdAng
         except Exception:
-            log.write("bridge client read error\n")
-            strSpdAng="00+000"
+            log.write("bride client error")
+            strSpeed="00"
             if debug:
                 print "errore di lettura bridge, forzo 00+000"
-        msg = strSpdAng+"\r\n"
+        msg = strSpeed+"\r\n"
         try:
             clientSock.sendto(msg,(remoteIP,port))
-            if debug:
-                print "sent message", msg,"to",remoteIP,port
+            print "sent message", msg,"to",remoteIP,port
         except socket.error:
-            log.write("udp client write error"); 
-            if debug:
-                print "write error"
+            log.write("udp client write error");          
+            print "write error"
     if clientSock in r:
-        #riceve pend da server
+        #riceve
         try:
             data, addr = clientSock.recvfrom(1024)
             if debug:
@@ -110,8 +108,8 @@ while True:
                 if debug:
                     print "dato non numerico, forzo 00"
             try:
-                msg=str(slope).zfill(2)
-                bridge.put("slope",msg)
+                msg=str(slope).zfill(2)              
+                bridge.put("slope",strSlope)
                 if debug:
                     print "slope trasferita a bridge", strSlope
             except Exception:

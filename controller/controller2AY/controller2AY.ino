@@ -1,9 +1,10 @@
 //The Gooble Bike 2.0VR!
-//Versione A
+//Versione AY
+//HW Arduino Yun/Leonardo
 //Campiona la velocità con interrupt (senza filtri antirimbalzo)
 //Campiona il valore analogico dello sterzo
-//Trasmette i dati su USB
-//Riceve la pendenza da USB
+//Trasmette i dati su USB ogni 250 mS
+//Riceve la pendenza da USB ogni 250 mS
 //Attua la pendenza
 //Segnali di I/O
 //PIN D2 INGRESSO: onda quadra (duty cycle 50%) dal trainer
@@ -14,7 +15,8 @@
 //PIN D9 USCITA: LED che indica la frenata
 //PIN D3 USCITA: LED che indica la velocità
 //PIN D12 USCITA: LED che segnala la comunicazione
-//09/11/2017
+//non c'è diagnostica seriale perchè i lcanale è occupato dalla comunicazione
+//14/11/2017
 
 #include <stdio.h>
 //Definizione degli I/O
@@ -43,10 +45,15 @@ int pend;                   //valore pendenza in %
 int brake;                  //valore uscita di frenata
 int rxStatus;               //stato automa ricezione
 int rxValue;                //valore ricevuto 
+char txBuf[]="00 +000";     //buffer di trasmissione
+int txBufLen=sizeof(txBuf); //dimensione del buffer di trasmissione
 
 void setup() {
+
   //apre console 
   Serial.begin(250000);
+  delay(10);
+
   //configura I/O
   pinMode(BKSPEED,INPUT);
   pinMode(SPEEDLED, OUTPUT);
@@ -57,6 +64,7 @@ void setup() {
   digitalWrite(BRAKELED,LOW);
   pinMode(COMLED,OUTPUT);
   digitalWrite(COMLED,LOW);
+  
   //inizializza variabili di stato
   bkspeed=0;
   angle=0;
@@ -64,9 +72,11 @@ void setup() {
   brake=0;
   rxStatus=WT_1ST_CH;
   rxValue=0;
+  
   //inizializza timers
   startTSend=micros();
   startTBase=micros();
+  
   //avvia contatore ed interrupt
   counter=0;
   attachInterrupt(digitalPinToInterrupt(BKSPEED), rising, RISING);
@@ -86,6 +96,7 @@ void falling() {
 }
 
 void loop() {
+  
   //gestione velocità
   if(micros()-startTBase>= TBASE) {   //verifica se time base 1S scaduto
     int c=constrain(counter,0,86);    //limita conteggio in range
@@ -103,11 +114,10 @@ void loop() {
   //invio dati
   if(micros()-startTSend>= TSEND) {   //verifica se time base 250 mS scaduto
     startTSend=micros();              //riavvia timebase
-    char buf[7];
-    sprintf(buf, "%02d %+04d", bkspeed,angle);
+    snprintf(txBuf,txBufLen, "%02d %+04d", bkspeed,angle);
     if(Serial.availableForWrite()>10) { //verifica se canale disponibile
       digitalWrite(COMLED,HIGH);        //diagnostica on
-      Serial.println(buf);              //invia messaggio "## ###CRLF"
+      Serial.println(txBuf);              //invia messaggio "## ###CRLF"
       digitalWrite(COMLED,LOW);         //diagnostica off
     }  
   }
