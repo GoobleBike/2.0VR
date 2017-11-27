@@ -13,7 +13,9 @@ class GooblePanorama{
         this.elementId=elementId;
         this.curPoint=curPoint;
         this.panorama=null;
+        this.nextPanorama=null;
         this.setPanorama();
+        this.pathFollower=new PathFollower();
     }
 
     /**
@@ -34,19 +36,43 @@ class GooblePanorama{
      */
     refresh(point,dir){
         this.panorama.setPosition(point);
+        var pos=this.panorama.getLocation().latLng;
+        var links=this.panorama.getLinks();
+        if (links.length!=0) {
+            var fwd=this.fwdLink(links);
+            var sl="";
+            for (var i=0;i<links.length;i++){
+                sl+="\tlnk["+i+"]:"+links[i].heading.toFixed(2);
+            }
+//            app.log("curr:"+app.currentDir.toFixed(2)+"\tfwd:"+fwd.heading.toFixed(2)+sl);
+        app.currentDir = fwd.heading;
         this.panorama.setPov({
 //            heading: dir,
 //            pitch: 0,
-                heading: app.currentHeading+this.curPoint.pov,
+                heading: app.currentHeading+app.currentDir,
                 pitch: app.currentPitch,
             zoom: 1
         });
-        var pos=this.panorama.getLocation().latLng;
+        }
+        
 //        pos=this.panorama.getLinks();
 ////        app.currentPoint=pos;
 //                app.log('panorama.update.oddIsVisible pov='+this.nextPoint.pov+"ODD -> "+JSON.stringify(this.panoramaOdd.getLinks()));
 //        app.log('panorama.refresh pov='+dir+" point = "+JSON.stringify(point)+" pos = "+JSON.stringify(pos));
-        app.log('panorama.refresh pov='+dir+" point = "+JSON.stringify(point));
+//        app.log('panorama.refresh pov='+dir+" point = "+JSON.stringify(point)+" pano = "+JSON.stringify(fwd));
+    }
+    
+    fwdLink(links){
+        var fwd=links[0];
+        var min=Math.abs(fwd.heading-app.currentDir);
+        for (var i=1;i<links.length;i++){
+            var d=Math.abs(links[i].heading-app.currentDir);
+            if(d<min){
+                min=d;
+                fwd=links[i];
+            }
+        }
+        return fwd;
     }
 
     refreshPov(){
@@ -69,8 +95,32 @@ class GooblePanorama{
             },
             scrollwheel: false
         };
-        this.panorama = new google.maps.StreetViewPanorama(this.elementId, panoramaOptions);
-        this.map.setStreetView(this.panorama);
+//        this.panorama = new google.maps.StreetViewPanorama(this.elementId, panoramaOptions);
+//        this.map.setStreetView(thisapp.currentHeadin.panorama);
+
+        var coord=new google.maps.LatLng(this.curPoint.lat, this.curPoint.lng);
+        
+        app.trace.map = new google.maps.Map(document.getElementById('trace'), {
+          center: coord,
+          zoom: 16
+        });
+        this.panorama = new google.maps.StreetViewPanorama(
+            this.elementId, {
+              position: coord,
+              pov: {
+                heading: app.currentHeading,
+                pitch: app.currentPitch
+              }
+            });
+        app.trace.map.setStreetView(this.panorama);
+        
+        
+        
+        
+        
+        
+        
+        
         app.log('panorama.setPanorama pov='+this.curPoint.pov+" point = "+JSON.stringify(panoramaOptions.position));
     }
 

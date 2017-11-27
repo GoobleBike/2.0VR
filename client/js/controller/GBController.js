@@ -8,9 +8,7 @@ class GBController{
      * @returns {GoobleControl}
      */
     constructor(){
-        //il modo può essere DEVELOP o PRODUCTION a seconda del valore della costatnte GOOBLE_CONTROL_MODE
-        this.mode=GOOBLE_CONTROL_MODE;
-        this.task=GB_BOEXP;
+        this.conf=new GBConfig();
         this.presetPercorsi=PRESET_PERCORSI;
         this.em=new ErrorManager(LOGGERENABLE,LOGAPI);//error manager  
         this.view=null;//view
@@ -69,7 +67,7 @@ class GBController{
     setup(){
         //automa dei control buttons
         //deve essere lanciato a pagina completamente caricata
-        this.view=new GBView(this.mode);
+        this.view=new GBView(this.conf.mode);
         this.goobleButtons = new GoobleButtons();
         this.trace=new TraceView();
     }
@@ -274,7 +272,8 @@ class GBController{
         //è la prima volta?
         if (this.vistamappa===VISTAMAPPA){
           //prima volta, istanzio panorama
-          this.panorama=new GooblePanorama(this.map,document.getElementById('map'),curPoint,iterator.nextNoMove());
+          this.panorama=new GooblePanorama(this.trace.map,document.getElementById('map'),curPoint,iterator.nextNoMove());
+//            this.trace.map.setStreetView(this.panorama);   
           this.vistamappa=VISTAPANORAMA;
         }
         else {
@@ -293,6 +292,15 @@ class GBController{
             }
         });
     };
+    
+    /**
+     * 
+     * @param {String} pano panorama id
+     * @returns {void}
+     */
+    updatePanorama(pano){
+        this.panorama.updatePano(pano)
+    }
 
     //percentuale percorsa
     getPercentPercorso() {
@@ -337,6 +345,7 @@ moveNextDistance(distance) {
       this.pendenza=this.inclinationFilter.update(distance);
     }
     this.lastClickTime=now;
+    //sposto currentPoint
     this.currentPoint=this.currentPoint.destinationPoint(this.currentDir,distance/1000);
     //aggiorna il panorama
     this.panorama.refresh(this.currentPoint,this.currentDir)
@@ -411,7 +420,7 @@ moveNextDistance(distance) {
     }
 
     rtHeading(){
-        if(this.currentHeading<180){
+        if(this.currentHeading<update){
             this.currentHeading++;
             this.panorama.refreshPov();
         }
@@ -435,7 +444,7 @@ moveNextDistance(distance) {
      */
     
     static run(){
-        alert("Per aumentare e diminuire velocità: tasti + e -\nPer ruotare la vista: i quattro tasti freccia")
+//        alert("Per aumentare e diminuire velocità: tasti + e -\nPer ruotare la vista: i quattro tasti freccia")
         app.setup();
         //carica la mappa
 //        app.log("Chiamata a loadMap");

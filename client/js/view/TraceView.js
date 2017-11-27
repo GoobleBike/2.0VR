@@ -24,7 +24,7 @@ class TraceView{
             scrollwheel: false
         };
         //map in canvas
-        this.map = new google.maps.Map(this.el, mapOptions);
+//        this.map = new google.maps.Map(this.el, mapOptions);
         this.count=0;
         this.poly = new google.maps.Polyline({
             strokeColor: '#FF0000',
@@ -47,6 +47,7 @@ class TraceView{
         if(this.map==null){
             this.setMap(point);
         }
+        else {
 //        new google.maps.Marker({
 //            position: point,
 //            map: this.map,
@@ -55,10 +56,11 @@ class TraceView{
 //                scale: 1
 //            },
 //        });
-        this.path.push(point);
-        this.map.setCenter(point);
-        this.count++;
-        app.log("addMArker #"+this.count+' '+JSON.stringify(point));
+            this.path.push(point);
+            this.map.setCenter(point);
+            this.count++;
+    //        app.log("addMArker #"+this.count+' '+JSON.stringify(point));
+        }
     }
 }
 

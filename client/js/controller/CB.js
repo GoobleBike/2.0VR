@@ -86,8 +86,9 @@ class CB{
    
     static pollSpeedFromDefaulUrl(){
 //        app.actualSpeed=5;
-        return;
-        $.ajax(URL+parseInt(app.pendenza), {
+//        return;
+        var p=(app.pendenza>0?app.pendenza:0);
+        $.ajax(URL+parseInt(p), {
             dataType: 'json',
             success: function(msg, status, xhr) {
                 if (msg.ck=='OK'){
@@ -113,7 +114,11 @@ class CB{
     //    console.log(goobleControl.percorsoAttivo?'autoMove-attivo':'autoMove-NONattivo')
       if (app.percorsoAttivo){
         //programma click
-        var distanza = (app.actualSpeed *1.5)* VIEW_REFRESH_TIME / 1000 // VIEW_REFRESH_TIME è in msec
+        // VIEW_REFRESH_TIME msec
+        // actualSpeed km/h
+        // distanza m
+//        var distanza = (app.actualSpeed *1.5)* VIEW_REFRESH_TIME / 1000 // VIEW_REFRESH_TIME è in msec
+        var distanza = (app.actualSpeed /3.6)* VIEW_REFRESH_TIME / 1000 // VIEW_REFRESH_TIME è in msec
         var percorsoFinito=app.moveNextDistance(distanza);
     //        this.autoTimer = setTimeout(this.autoMove.bind(this), 2000);
             // this.autoTimer = setTimeout(this.autoMove.bind(this), tempo);

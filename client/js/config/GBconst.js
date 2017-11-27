@@ -29,9 +29,9 @@ const LOGAPI=LOGHOST+"/gooble/api/log?id="+MYID+"";
  * costanti di temporizzazione
  */
 const IMAGE_REFRESH_TIME = 4000;
-//const VIEW_REFRESH_TIME = 950;
+const VIEW_REFRESH_TIME = 950;
 //const VIEW_REFRESH_TIME = 5000;
-const VIEW_REFRESH_TIME = 1900;
+//const VIEW_REFRESH_TIME = 1900;
 const DATA_REFRESH_TIME = 1000;
 
 // costante per mappa di default
