@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #udp client per yun
-#2BY comunica su UDP, velocità/angolo/pendenza
+#2BY comunica su UDP, velocita/angolo/pendenza
 import socket
 import time
 import select
@@ -27,8 +27,11 @@ if len(sys.argv)<4:
     exit(1)
 else:
     remoteIP = sys.argv[1]
-    port = sys.argv[2]
-    debug=sys.argv[3]
+    port = int(sys.argv[2])
+    if sys.argv[3]=="True":
+	    debug=True
+    else:
+        debug=False
     if debug:
         print sys.argv
 #variabili
