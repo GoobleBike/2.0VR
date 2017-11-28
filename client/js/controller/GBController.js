@@ -42,12 +42,13 @@ class GBController{
         //strada rimanente al prossimo GooglePoint;
         this.toNextPoint=0;
         //ora dell'ultimo click
-        this.lastClickTime=0;
+//        this.lastClickTime=0;
         //velocità corrente
-        this.actualSpeed=0;
+        this.actualSpeed=20;
         this.currentHeading=0;
         this.currentPitch=0;
         this.currentDir=0;
+        this.currentTarget=0;
         // timer per riconoscere la fermata
         this.timerFermo;
         //la pendenza corrente
@@ -199,9 +200,9 @@ class GBController{
             this.trace.setMap(this.currentPoint);
             var now=new Date().getTime();
             this.ultimoIntertempo=0;
-            this.actualSpeed=0;
+            this.actualSpeed=20;
             this.stradaPercorsa=0;
-            this.lastClickTime=now;
+//            this.lastClickTime=now;
             this.toNextPoint+=curPoint.dst;//imposta la distanza al prossimo punto
             this.pendenza=curPoint.inc;
             if (INCLINATION_FILTER_MODE===IF_ABSORBER) {
@@ -212,7 +213,7 @@ class GBController{
 
             //commuta stato
             this.goobleButtons.action(this.goobleButtons.RIDE);
-            this.lastClickTime=new Date().getTime();
+//            this.lastClickTime=new Date().getTime();
             this.percorsoAttivo=true;
         }
         else {
@@ -333,7 +334,7 @@ class GBController{
  * @param {type} distance
  * @returns {Boolean}
  */
-moveNextDistance(distance) {
+moveNextDistanceNORUNME(distance) {
     // ho avuto un click
     var percorsoFinito=false;
     //un colpo di click indica una avanzamento sulla strada percorsa
@@ -344,7 +345,7 @@ moveNextDistance(distance) {
     if (INCLINATION_FILTER_MODE===IF_ABSORBER) {
       this.pendenza=this.inclinationFilter.update(distance);
     }
-    this.lastClickTime=now;
+//    this.lastClickTime=now;
     //sposto currentPoint
     this.currentPoint=this.currentPoint.destinationPoint(this.currentDir,distance/1000);
     //aggiorna il panorama
@@ -353,6 +354,67 @@ moveNextDistance(distance) {
     this.view.updateDashboard();
     //estrae posizione successiva ??
     if (this.toNextPoint<=0){
+      //avanza al prossimo punto
+      if (this.rideIterator.hasNext()) {
+          //ci sono ancora punti
+          var curPoint=this.moveToNext(this.rideIterator);
+//          this.rideStep++;
+          this.toNextPoint+=curPoint.dst;//imposta la distanza al prossimo punto
+          if (INCLINATION_FILTER_MODE===IF_ABSORBER) {
+            this.inclinationFilter.newPoint(curPoint.inc)
+          }
+          else {
+            this.pendenza=curPoint.inc;
+          }
+          this.view.updateDashboard();
+      }
+      else {
+          //arrivato a destinazione ferma autorun
+          this.percorsoAttivo=false;
+        clearInterval(this.autoTimer);
+        clearInterval(this.speedPoller);
+          this.goobleButtons.action(this.goobleButtons.STOP);
+//          this.clearRoute();//portato dentro a loadSegment
+          $("#splash2text").html("Congratulations !!! <br> You've completed the path:<br>"+
+                  this.presetPercorsi[this.segManager.currentSegment][2]);
+          $("#splash2").show();
+//          $("#splash").show(2000);
+//          this.view.msgFinePath();
+          percorsoFinito=true;
+//          this.loadSegment();
+            setTimeout(function(){
+                app.segManager.loadSegment();        
+            }, 5000);
+          
+      }
+//      this.view.updateDashboard();
+    }
+    return percorsoFinito;
+};
+
+/**
+ * aggiorna i dati perché ci si è mossi di ìdistance'
+ * @param {type} distance
+ * @returns {Boolean}
+ */
+moveNextDistance2(distance) {
+    // foi spostare current point
+    this.panorama.goFwdStart(distance);
+}
+curPointMoved(distance){
+    var percorsoFinito=false;
+    this.stradaPercorsa+=distance;
+    this.toNextPoint-=distance;
+    //////////////////TODO verificare
+    if (INCLINATION_FILTER_MODE===IF_ABSORBER) {
+      this.pendenza=this.inclinationFilter.update(distance);
+    }
+    //aggiorna il panorama !!già fatto!!
+//    this.panorama.refresh(this.currentPoint,this.currentDir)
+    this.trace.addMarker(this.currentPoint);
+    this.view.updateDashboard();
+    //estrae posizione successiva ??
+    if (false && this.toNextPoint<=0){
       //avanza al prossimo punto
       if (this.rideIterator.hasNext()) {
           //ci sono ancora punti
@@ -420,7 +482,7 @@ moveNextDistance(distance) {
     }
 
     rtHeading(){
-        if(this.currentHeading<update){
+        if(this.currentHeading<180){
             this.currentHeading++;
             this.panorama.refreshPov();
         }
@@ -431,6 +493,26 @@ moveNextDistance(distance) {
             this.currentHeading--;
             this.panorama.refreshPov();
         }
+    }
+    centerPitchHeading(){
+        this.currentPitch=0;
+        this.currentHeading=0;
+        this.panorama.refreshPov();
+    }
+    
+    targetLt(){
+        this.currentTarget=-60;
+        this.view.updateTargetDir();
+    }
+
+    targetFwd(){
+        this.currentTarget=0;
+        this.view.updateTargetDir();
+    }
+
+    targetRt(){
+        this.currentTarget=60;
+        this.view.updateTargetDir();
     }
 
 /*

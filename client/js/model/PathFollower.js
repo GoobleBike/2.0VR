@@ -7,14 +7,22 @@
 class PathFollower{
     constructor(){
         this.service=new google.maps.StreetViewService();
-        this.currentPanorama=null;
+//        this.currentPanorama=null;
         this.sum=0;
         this.dist=null;
+        this.currentLatLng=null;
+        this.currentLinks=null;
+        this.prevPano=null;
+        this.prevLatLng=null;
+        this.nextPano=null;
+        this.nextLatLng=null;
+        this.newPano=null;
+        this.waitingFor=null;
     }
     
-    setCurrentPanorama(panorama){
-        this.currentPanorama=panorama;        
-    }
+//    setCurrentPanorama(panorama){
+//        this.currentPanorama=panorama;        
+//    }
     
     /**
      * 
@@ -59,43 +67,64 @@ class PathFollower{
         });
     }
     
-    goFwdStart(location,links,dist){
+    goFwdStart(location,links,dir,dist){
+//        app.log("pFollw: d="+dist+"\ts="+this.sum+"\tlocation="+JSON.stringify(location));
+        console.log("pFollw: d="+dist.toFixed(3)+"\ts="+this.sum.toFixed(3)+"\tpano="+app.panorama.panorama.getLocation().pano+"\tdir="+dir.toFixed(2)+" START\ttot="+app.stradaPercorsa.toFixed(1));
         this.dist=dist;
+        this.currentDir=dir;
         this.currentLatLng=null;
         this.currentLinks=null;
         this.prevPano=null;
-        this.prevLatLng=null;
+        this.prevLatLng=location.latLng;
         this.nextPano=null;
         this.nextLatLng=null;
         this.newPano=null;
-        this.waitingFor=null;
         var fwd=this.fwdLink(links,dir);
-        this.service.getPanorama({pano:fwd.pano},cbGetPanorama);//will call goFwdStep
+        this.fwdDir=fwd.heading;
+        this.waitingFor=fwd.pano;
+        this.service.getPanorama({pano:fwd.pano},PathFollower.cbGetPanorama);//will call goFwdStep
     }
+    
     goFwdStep(location,links){
-        var segLen=1;//TODO google.maps.geometry.spherical.computeDistanceBetween(curGPoint, nextGPoint);
+//        app.log(JSON.stringify(this.prevLatLng)+JSON.stringify(location.latLng))
+        var segLen= google.maps.geometry.spherical.computeDistanceBetween(this.prevLatLng, location.latLng);
+        var dLat=(location.latLng.lat()-this.prevLatLng.lat())*100000;
+        var dLng=(location.latLng.lng()-this.prevLatLng.lng())*100000;
         if(segLen<this.dist-this.sum){
             //accumulo questa lunghezza
             this.sum+=segLen;
+            this.prevLatLng=location.latLng;
+            this.prevPano=location.pano;
+            console.log("pFollw: d="+this.dist.toFixed(3)+"\ts="+this.sum.toFixed(3)+"\tseg="+segLen.toFixed(3)+"\tpano="+location.pano+"\tdir="+this.currentDir.toFixed(2)+"\tdLat="+dLat.toFixed(2)+"\tdLng="+dLng.toFixed(2));
         }
         else{
             //quale approssima meglio?
             var toDist=this.dist-this.sum;
             if(toDist<segLen-toDist){
                 //meglio prev
-                newPano=prevPano;
+                this.newPano=this.prevPano;
+                this.newHeading=this.currentDir;
             }
             else {
                 //meglio next
-                newPano=nextPano;
+                this.newPano=location.pano;
+                this.newHeading=this.fwdDir;
+                this.sum+=segLen;
+                this.prevLatLng=location.latLng;
             }
-            found=true;
+//            found=true;
+            this.sum-=this.dist;
+            console.log("pFollw: d="+this.dist.toFixed(3)+"\ts="+this.sum.toFixed(3)+"\tseg="+segLen.toFixed(3)+"\tpano="+this.newPano+"\tdir="+app.currentDir.toFixed(2)+"\tdLat="+dLat.toFixed(2)+"\tdLng="+dLng.toFixed(2)+"\tFOUND!");
             //questo sarà il nuovo panorama 
-            return newPano; 
+            app.panorama.movePano(this.newPano,this.newHeading,this.dist);
+            return; 
         }            
         //next step
-        var fwd=this.fwdLink(links,dir);
-        this.service.getPanorama({pano:fwd.pano},cbGetPanorama);//will call goFwdStep
+        this.currentDir=this.fwdDir;
+        var fwd=this.fwdLink(links,this.currentDir);
+        this.fwdDir=fwd.heading;
+        this.waitingFor=fwd.pano;
+        this.service.getPanorama({pano:fwd.pano},PathFollower.cbGetPanorama);//will call goFwdStep
     }
     
     objCbGetPanorama(data){
@@ -106,15 +135,27 @@ class PathFollower{
             }
             else {
                 //errore
+                app.log("PathFollower.objCbGetPanorama data.location.pano not found");
             }
         }
         else {
             //errore
+            app.log("PathFollower.objCbGetPanorama waiting for null");
         }
-        
+    }
+    
+    errCbGetPanorama(status){
+        app.log("PathFollower.errCbGetPanorama status="+status);
+        this.waitingFor=null;
     }
 
     fwdLink(links,dir){
+        dir+=app.currentTarget;
+        var s="links=";
+        for (var i=0;i<links.length;i++){
+            s+=" {"+links[i].heading.toFixed(2)+" "+links[i].pano+"}";
+        }
+        console.log(s+dir.toFixed(1));
         var fwd=links[0];
         var min=Math.abs(fwd.heading-dir);
         for (var i=1;i<links.length;i++){
@@ -131,10 +172,10 @@ class PathFollower{
     
     static cbGetPanorama(data,status){
         if(status==google.maps.StreetViewStatus.OK){
-            app.pFollower.objCbGetPanorama(data);
+            app.panorama.pathFollower.objCbGetPanorama(data);
         }
         else {
-            app.pFollower.errCbGetPanorama();
+            app.panorama.pathFollower.errCbGetPanorama(status);
         }
     }
 }

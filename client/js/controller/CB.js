@@ -86,7 +86,7 @@ class CB{
    
     static pollSpeedFromDefaulUrl(){
 //        app.actualSpeed=5;
-//        return;
+        return;
         var p=(app.pendenza>0?app.pendenza:0);
         $.ajax(URL+parseInt(p), {
             dataType: 'json',
@@ -119,7 +119,7 @@ class CB{
         // distanza m
 //        var distanza = (app.actualSpeed *1.5)* VIEW_REFRESH_TIME / 1000 // VIEW_REFRESH_TIME è in msec
         var distanza = (app.actualSpeed /3.6)* VIEW_REFRESH_TIME / 1000 // VIEW_REFRESH_TIME è in msec
-        var percorsoFinito=app.moveNextDistance(distanza);
+        var percorsoFinito=app.moveNextDistance2(distanza);
     //        this.autoTimer = setTimeout(this.autoMove.bind(this), 2000);
             // this.autoTimer = setTimeout(this.autoMove.bind(this), tempo);
       }
@@ -148,11 +148,17 @@ class CB{
             case 37: //left
                 app.ltHeading();
                 break;
+            case 48: //0
+                app.centerPitchHeading();
+                break;
             case 65: //A
+                app.targetLt();
                 break;
             case 83: //S
+                app.targetFwd();
                 break;
             case 68: //D
+                app.targetRt()
                 break;
             default: //
                 break;

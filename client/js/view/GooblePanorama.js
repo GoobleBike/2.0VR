@@ -17,7 +17,13 @@ class GooblePanorama{
         this.setPanorama();
         this.pathFollower=new PathFollower();
     }
-
+    
+    goFwdStart(distance){
+        var pos=this.panorama.getLocation();
+        var links=this.panorama.getLinks();
+        this.pathFollower.goFwdStart(pos,links,app.currentDir,distance);
+    }
+    
     /**
      * 
      * @param {GooblePoint} gbPpoint
@@ -25,16 +31,41 @@ class GooblePanorama{
      */
     update(gbPpoint) {
         this.curPoint=gbPpoint;
-        this.refresh(new google.maps.LatLng(this.curPoint.lat, this.curPoint.lng),this.curPoint.pov);
+//        this.refresh(new google.maps.LatLng(this.curPoint.lat, this.curPoint.lng),this.curPoint.pov);
+        this.panorama.setPosition(new google.maps.LatLng(this.curPoint.lat, this.curPoint.lng));
+        this.refreshDir(this.curPoint.pov);
     }
-    
+    movePano(pano,dir,dist){
+        if(pano!=null){
+            this.panorama.setPano(pano);
+        }
+        this.refreshDir(dir);
+        app.currentPoint=this.panorama.getLocation().latLng;
+        app.curPointMoved(dist);
+    }
+    refreshDir(dir){
+//        var links=this.panorama.getLinks();
+//        if (links.length!=0) {
+//            var fwd=this.fwdLink(links);
+//            var sl="";
+//            for (var i=0;i<links.length;i++){
+//                sl+="\tlnk["+i+"]:"+links[i].heading.toFixed(2);
+//            }
+        app.currentDir = dir;
+        this.panorama.setPov({
+                heading: app.currentHeading+app.currentDir,
+                pitch: app.currentPitch,
+            zoom: 1
+        });
+//        }
+    }
     /**
      * 
      * @param {LatLng} point
      * @param {float} dir
      * @returns {void}
      */
-    refresh(point,dir){
+    refreshNORUNME(point,dir){
         this.panorama.setPosition(point);
         var pos=this.panorama.getLocation().latLng;
         var links=this.panorama.getLinks();
@@ -62,7 +93,7 @@ class GooblePanorama{
 //        app.log('panorama.refresh pov='+dir+" point = "+JSON.stringify(point)+" pano = "+JSON.stringify(fwd));
     }
     
-    fwdLink(links){
+    fwdLinkNoRunMe(links){
         var fwd=links[0];
         var min=Math.abs(fwd.heading-app.currentDir);
         for (var i=1;i<links.length;i++){
@@ -85,21 +116,17 @@ class GooblePanorama{
     }
 
     setPanorama() {
-        var panoramaOptions = {
-            position: new google.maps.LatLng(this.curPoint.lat, this.curPoint.lng),
-            pov: {
-//                heading: this.curPoint.pov,
-                heading: app.currentHeading,
-                pitch: app.currentPitch,
-                zoom: 1
-            },
-            scrollwheel: false
-        };
-//        this.panorama = new google.maps.StreetViewPanorama(this.elementId, panoramaOptions);
-//        this.map.setStreetView(thisapp.currentHeadin.panorama);
-
         var coord=new google.maps.LatLng(this.curPoint.lat, this.curPoint.lng);
-        
+//        var panoramaOptions = {
+//            position: coord,
+//            pov: {
+////                heading: this.curPoint.pov,
+//                heading: app.currentHeading,
+//                pitch: app.currentPitch,
+//                zoom: 1
+//            },
+//            scrollwheel: false
+//        };
         app.trace.map = new google.maps.Map(document.getElementById('trace'), {
           center: coord,
           zoom: 16
@@ -110,18 +137,11 @@ class GooblePanorama{
               pov: {
                 heading: app.currentHeading,
                 pitch: app.currentPitch
-              }
+              },
+            scrollwheel: false
             });
         app.trace.map.setStreetView(this.panorama);
-        
-        
-        
-        
-        
-        
-        
-        
-        app.log('panorama.setPanorama pov='+this.curPoint.pov+" point = "+JSON.stringify(panoramaOptions.position));
+        app.log('panorama.setPanorama pov='+this.curPoint.pov+" point = "+JSON.stringify(coord));
     }
 
 }
