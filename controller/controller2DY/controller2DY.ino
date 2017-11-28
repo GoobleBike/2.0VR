@@ -1,7 +1,7 @@
 //The Gooble Bike 2.0VR!
 //Versione DY
 //HW Arduino Yun
-//richiede lo script udp-client2BY.py in autoavvio sul lato Linino
+//richiede lo script udp-client2DY.py in autoavvio sul lato Linino
 //Campiona la velocità con interrupt (senza filtri antirimbalzo)
 //Campiona il valore analogico dello sterzo
 //Trasmette i dati su UDP via Bridge ogni 250 mS
