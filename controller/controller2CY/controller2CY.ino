@@ -111,7 +111,8 @@ void loop() {
     //trasmissione
     digitalWrite(COMLED,HIGH);        //diagnostica on
     snprintf(txBuf,txBufLen, "V%02d", bkspeed);
-    Bridge.put("speed",String(txBuf));
+//    Bridge.put("speed",String(txBuf));
+    Bridge.put("vel","V20");
     if(debug){
       Serial.println(txBuf);
     }
