@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #udp client per yun
-#2CY comunica su UDP, velocità/pendenza
+#2CY comunica su UDP, velocita/pendenza
 import socket
 import time
 import select
@@ -10,9 +10,9 @@ sys.path.insert(0,'/usr/lib/python2.7/bridge/')
 from bridgeclient import BridgeClient
 #rilascia socket in uscita
 def closeSock():
+    clientSock.close()
     log.write("process terminated\n")
     log.close()
-    clientSock.close()
 atexit.register(closeSock)
 #linea di comando: python udp-client2BY.py <remoteip> <remoteport> <debug>
 #sys.argv[0]: udp-client2BY.py
@@ -27,13 +27,16 @@ if len(sys.argv)<4:
     exit(1)
 else:
     remoteIP = sys.argv[1]
-    port = sys.argv[2]
-    debug=sys.argv[3]
+    port = int(sys.argv[2])
+    if sys.argv[3]=="True":
+	    debug=True
+    else:
+        debug=False
     if debug:
         print sys.argv
 #variabili
-speed = 0
-angle = +000
+speed = 0      #velocita       
+angle = +000   #angolo
 #debug: diagnostica locale
 if debug:
     print "udp-client 2CY"
@@ -58,7 +61,7 @@ udpConnect = False
 while udpConnect == False:
     try:
         clientSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        serverSock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        clientSock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         udpConnect = True
     except socket.error:
         log.write("socket creation error\n")
@@ -74,21 +77,22 @@ while True:
     if clientSock in w:
         #trasmette
         try:
-            strSpeed = bridge.get("speed")
+            strSpeed = bridge.get("spdang")
             if debug:
                 print "read speed from bridge",strSpdAng
         except Exception:
             log.write("bride client error")
-            strSpeed="00"
+            strSpeed="V00"
             if debug:
-                print "errore di lettura bridge, forzo 00+000"
+                print "errore di lettura bridge, forzo 00"
         msg = strSpeed+"\r\n"
         try:
             clientSock.sendto(msg,(remoteIP,port))
             print "sent message", msg,"to",remoteIP,port
         except socket.error:
             log.write("udp client write error");          
-            print "write error"
+            if debug:
+                print "write error"
     if clientSock in r:
         #riceve
         try:
