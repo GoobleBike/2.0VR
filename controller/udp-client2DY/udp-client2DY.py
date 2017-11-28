@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #udp client per yun
-#2CY comunica su UDP, velocita/pendenza
+#2DY comunica su UDP, velocita/angolo/pendenza
 import socket
 import time
 import select
@@ -39,7 +39,7 @@ speed = 0      #velocita
 angle = +000   #angolo
 #debug: diagnostica locale
 if debug:
-    print "udp-client 2CY"
+    print "udp-client 2DY"
 #log su file
 log = open("log-udp-client.txt","w",0)
 log.write("starting script\n")
@@ -70,31 +70,32 @@ while udpConnect == False:
 log.write("socket client created\n")
 #loop di comunicazione
 while True:
-    #ogni 1 S
-    time.sleep(1)
+    #ogni 1000 mS
+    time.sleep(1.0)
     #verifica se eventi di r(ead), w(rite), (e)x(ception)
     r,w,x = select.select([clientSock],[clientSock],[clientSock])
     if clientSock in w:
-        #trasmette
+        #trasmette vel e ang al server
         try:
-            strSpeed = bridge.get("spdang")
+            strSpdAng = bridge.get("spdang")
             if debug:
-                print "read speed from bridge",strSpdAng
+                print "read speed/angle from bridge",strSpdAng
         except Exception:
-            log.write("bride client error")
-            strSpeed="V00"
+            log.write("bridge client read error\n")
+            strSpdAng="V00"
             if debug:
-                print "errore di lettura bridge, forzo 00"
-        msg = strSpeed+"\r\n"
+                print "errore di lettura bridge, forzo V00"
+        msg = strSpdAng+"\r\n"
         try:
             clientSock.sendto(msg,(remoteIP,port))
-            print "sent message", msg,"to",remoteIP,port
+            if debug:
+                print "sent message", msg,"to",remoteIP,port
         except socket.error:
-            log.write("udp client write error");          
+            log.write("udp client write error"); 
             if debug:
                 print "write error"
     if clientSock in r:
-        #riceve
+        #riceve pend da server
         try:
             data, addr = clientSock.recvfrom(1024)
             if debug:
@@ -112,8 +113,8 @@ while True:
                 if debug:
                     print "dato non numerico, forzo 00"
             try:
-                msg=str(slope).zfill(2)              
-                bridge.put("slope",strSlope)
+                msg=str(slope).zfill(2)
+                bridge.put("slope",msg)
                 if debug:
                     print "slope trasferita a bridge", strSlope
             except Exception:
