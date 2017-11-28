@@ -21,8 +21,8 @@ class SegmentManager{
     }
     app.log('load segment '+this.currentSegment);
     app.clearRoute();
-    $("#preload_info").html(app.presetPercorsi[this.currentSegment][2]);
-    $("#cruscotto_info").html(app.presetPercorsi[this.currentSegment][2]);
+//    $("#preload_info").html(app.presetPercorsi[this.currentSegment][2]);
+//    $("#cruscotto_info").html(app.presetPercorsi[this.currentSegment][2]);
     setTimeout(SegmentManager.timeOutCB, 5000);
 };
     //metodi statici

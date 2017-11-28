@@ -151,9 +151,39 @@ class GBController{
     /**
      * crea un percorso a partire da due punti passati come parametri
      * @param {String} start l'origine del percorso
-     * @param {String} end la destinazione del percorso
+     * @param {String} end la NNdestinazione del percorso
      * @returns {undefined}
      */
+    makeRouteNORUNME(start, end) {
+        new google.maps.Marker({
+            position: start,
+            map: this.map,
+//            icon: {
+//                path: google.maps.SymbolPath.CIRCLE,
+//                scale: 1
+//            },
+        });
+
+    }
+    makeRoute(start, end) {
+        new google.maps.Marker({
+            position: start,
+            map: this.map,
+        });
+
+
+//        //predispone il renderizzatore del percorso e lo associa alla mappa
+//        this.directionsDisplay.setMap(this.map); //ERRORE02
+//        //chiede la costruzione di un percorso ritardare callback
+//        this.directionsService.route(myDirections,  );
+
+    //    //N.B.:essendo stata chiamata una callback questa viene eseguita in modo asincrono
+    //    //ed il metodo termina prima che sia finita.
+    //    non è più problema, le azioni conseguenti sono tutte nella callback
+        //commuta stato
+        this.goobleButtons.action(this.goobleButtons.MAKEPATH);
+        CB.makeRoute(google.maps.DirectionsStatus.OK,);
+    }; // end makeRoute
     makeRoute(start, end) {
         //imposta la chiamata alla googleapi, il relativo metodo di callback manipolerà i dati ricevuti
 

@@ -13,11 +13,12 @@ class GBView{
         this.setStatusModeView();
         this._tipoVista=VISTAMAPPA;
         //progress bar
-        this.progressBar=new ProgressBar();
+//        this.progressBar=new ProgressBar();
         //landmeter
         this.landmeter=new Landmeter("canvas_pendenza",200,100);
         //speedometer
         this.speedometer=new Speedometer("canvas_tachimetro",200,100,MAX_SPEED);
+        this.updateTargetDir();
     }
     set tipoVista(v){
         this._tipoVista=v;
@@ -164,14 +165,14 @@ class GBView{
 
     openDashboard(){
 //        $("#progressbar").show(1);
-        $("#progressbar").hide();
+//        $("#progressbar").hide();
         this.landmeter.draw()
         this.speedometer.draw()
       //  $("#splash").show(2000);
     };
 
     closeDashboard(){
-        $("#progressbar").hide();
+//        $("#progressbar").hide();
     };
 
     mostraPresetPercorsi(percorsi){
@@ -183,7 +184,7 @@ class GBView{
         }
         $("#preload_buttons").html(bottoni);
     };
-    updateTargetDir(){
+    updateTargetDirTxt(){
         var t="---";
         if(app.currentTarget==0){
             t="-^-";
@@ -195,6 +196,24 @@ class GBView{
             t="-->";
         }
         $("#targetdir").html(t);
+    }
+    updateTargetDir(){
+        $("#targetlt").hide();
+        $("#targetfwd").hide();
+        $("#targetrt").hide();
+        
+        if(app.currentTarget==0){
+            //fwd
+            $("#targetfwd").show();
+        }
+        else if (app.currentTarget<0){
+            //lt
+            $("#targetlt").show();
+        }
+        else {
+            //rt
+            $("#targetrt").show();
+        }
     }
 
 }

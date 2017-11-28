@@ -26,6 +26,63 @@ class CB{
     * @param {DirectionsStatus} status lo stato ritornato
     * @returns {undefined}
     */
+    static makeRouteNORUNME(result, status) {
+       //callback dal directions services
+       if (status == google.maps.DirectionsStatus.OK) {
+           //reset del path
+           app.gooblePath.clear();
+           //reset InclinationFilter
+           app.inclinationFilter.clear();
+           //mostra il percorso sulla mappa
+           var directionsResultObj = result;
+           app.directionsDisplay.setDirections(result);
+           //estrae punti dal percorso e li memorizza nei gooble points
+           //percorre gli steps
+           var mySteps = directionsResultObj.routes[0].legs[0].steps;
+           //var totalDistance=directionsResultObj.routes[0].legs[0].distance;
+//           var stepElements = mySteps.length;
+//           var i;
+//           var lastLat = 0;
+//           var lastLng = 0;
+//           for (i = 0; i < stepElements; i++) {
+//               //per ogni step percorre il path
+//               var pathElements = mySteps[i].path.length;
+//               var j;
+//               for (j = 0; j < pathElements - 1; j++) {
+//   //                k = j + 1;                 //per ogni elemento di path crea un Gooble Point
+//   //                var lat = mySteps[i].path[j].lat();
+//   //                var lng = mySteps[i].path[j].lng();
+//                     var lat = Math.round(mySteps[i].path[j].lat()*10000)/10000;
+//                     var lng = Math.round(mySteps[i].path[j].lng()*10000)/10000;
+//                   if ((lat != lastLat) && (lng != lastLng)) {
+//                       //this.em.debug("sonodentro");
+//                       var point = new GooblePoint(mySteps[i].path[j].lat(), mySteps[i].path[j].lng(), 0, 0, 0, 0, 0);
+//                       app.gooblePath.add(point);
+//                       lastLat=lat;
+//                       lastLng=lng;
+//                   }
+//
+//               }
+//           }
+//           // il path è ora memorizzato nell'attributo gooblePath
+//   //        //dump dei dati
+//   //        goobleControl.view.dumpPath(self.gooblePath);
+//
+//           //calcola il pov  e la distance
+//           app.gooblePath.calcolaPovDistanzePath();
+//
+//           //calcola altezza e inclinazione dei punti nel path
+//           app.gooblePath.calcolaAltezzaInclinazionePath();  //apre un thread con il suo callback
+
+   //        //fine calcolo dst,elv, dump dei dati
+   //        goobleControl.view.dumpPath(self.gooblePath);
+
+       }
+       else  {
+            app.critical("Critical Error GoobleControl 0001");
+       }
+
+   };
     static makeRoute(result, status) {
        //callback dal directions services
        if (status == google.maps.DirectionsStatus.OK) {
