@@ -77,13 +77,61 @@ class ApiController extends Controller
      */
     
     /**
-     * set di velocità da parte della gb 
-     * setv_getp?id=x&v=y[&f=z]
+     * set di angolazione da parte della gb 
+     * seta?id=x&a=y[&f=z]
      * @param type $id gb id (gooblebike che chiama)
-     * @param type $v velocità in km/h
+     * @param type $a angolo in gradi
      * @param type $f force : se !== null ignora id
-     * @return int output raw della pendenza (%)
+     * @return int 0->error 1->ok
      */
+    public function actionSeta($id,$a,$f=null){
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_RAW;
+        $now=date("Y-m-d H:i:s");        
+        //log
+        $log=new \app\models\Logstato();
+        $log->who='gb';
+        $log->id=$id;
+        $log->what='a';
+        $log->how=$a;
+        $log->ts=$now;
+        $log->note=$f===null?'':"FORCE";
+        if ($f===null){
+            //chek di id
+            if ($id != $this->config['gb']){
+                //id di gb non conforme
+                //salva log
+                $log->note="MISMATCH";
+                $log->save();
+                 //restituisce uno 0
+                return 0;
+            }
+        }
+        //check passato oppure f !== null (force!)
+//        $model = Stato::findOne(['who' => 'gb', 'id' => $id, 'what' => 'v']);
+        $model = Stato::findOne(['who' => 'gb', 'id' => $this->config['gb'], 'what' => 'a']);
+        $model->how=$a;
+//        $model->how=10;
+        $model->ts=$now;
+        $model->save();
+        //log
+        $log->save();
+//        $model = Stato::findOne(['who' => 'wc', 'id' => $this->config['wc'], 'what' => 'p']);
+//        //verifica di timeout
+//        $datetime1 = new DateTime($now);
+//        $datetime2 = new DateTime($model->ts);
+//        $diff=$datetime1->getTimestamp()-$datetime2->getTimestamp();
+//        if ($diff > $this->config['wcto']){
+//            //timeout!
+//            $p=0;
+//        }
+//        else {
+//            $p=$model->how;
+//        }
+//        
+//        $items=$p;
+        return 1;
+    }
+
     public function actionSetv_getp($id,$v,$f=null){
         \Yii::$app->response->format = \yii\web\Response::FORMAT_RAW;
         $now=date("Y-m-d H:i:s");        
