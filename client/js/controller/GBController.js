@@ -402,6 +402,14 @@ moveNextDistance2(distance) {
     this.panorama.goFwdStart(distance);
 }
 curPointMoved(distance){
+    //carica in db le coordinate del nuovo punto
+        $.ajax(LOCATIONURL+"&lat="+this.currentPoint.lat()+"&lng="+this.currentPoint.lng()+"&hdng="+Math.round(this.currentDir), {
+            dataType: 'json',
+            success: function(msg, status, xhr) {
+                //msg.a è l'angolo di sterzo               
+            }
+        });
+    //procedi con gli altri aggiornamenti
     var percorsoFinito=false;
     this.stradaPercorsa+=distance;
     this.toNextPoint-=distance;
@@ -515,6 +523,28 @@ curPointMoved(distance){
         this.view.updateTargetDir();
     }
 
+    /**
+     * aggiorna la direzione richiesta con il manubrio
+     * @param {int} a angolo ricevuto dal campo
+     * @returns {undefined}
+     */
+    updateCurrentTarget(a){
+        if (a>RT_ANGLE_THR){
+            //destra
+            this.currentTarget=60;
+            this.view.updateTargetDir();
+        }
+        else if (a<LT_ANGLE_THR){
+            //sinistra
+            this.currentTarget=-60;
+            this.view.updateTargetDir();
+        }
+        else {
+            //centro
+            this.currentTarget=0;
+            this.view.updateTargetDir();
+        }
+    }
 /*
  * end develop tools
  */
@@ -541,7 +571,7 @@ curPointMoved(distance){
         app.segManager.startSegment();
         //capture keydown
         $( "body" ).on( "keydown", CB.keydownHandler);
-        
+        this.autoAnglePoll = setInterval(CB.anglePoll, ANG_POLL_TIME);
     }
     
    

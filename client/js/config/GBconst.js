@@ -33,6 +33,7 @@ const VIEW_REFRESH_TIME = 950;
 //const VIEW_REFRESH_TIME = 5000;
 //const VIEW_REFRESH_TIME = 1900;
 const DATA_REFRESH_TIME = 1000;
+const ANG_POLL_TIME=1200;//intervallo di polling per l'angolo del manubrio
 
 // costante per mappa di default
 const DEFAULT_MAP_ORIGIN="via Rizzoli,2 Bologna";
@@ -50,6 +51,14 @@ const INCLINATION_FILTER_MODE=IF_ABSORBER;
 
 //API per aggiornamento velocità
 const URL = "http://localhost/gooble/api/setp_getv?id="+MYID+"&p=";
+const ANGLEURL = "http://localhost/gooble/api/getdump?id="+MYID;
+const LOCATIONURL = "http://localhost/gooble/api/setloc?id="+MYID;
+
+/*
+ * soglie di filtro per l'ngolo di sterzata
+ */
+RT_ANGLE_THR=16;//soglia destra
+LT_ANGLE_THR=-16;//soglia sinistra
 
 //const PRESET_PERCORSI=[
 //  ["Piazza della Pace, 40134 Bologna","Santuario Madonna di San Luca, Via di San Luca, 36, 40135 Bologna","Via di San Luca<br>from Piazza della Pace<br>to Santuario di San Luca"],// 
