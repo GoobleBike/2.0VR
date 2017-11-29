@@ -8,7 +8,7 @@
 const DEVELOP="DEVELOP";
 const PRODUCTION="PRODUCTION";
 const DEMO="DEMO";
-const CALLDB=false;
+const CALLDB=true;
 //delle prossime due va attivata una sola
 //const GOOBLE_CONTROL_MODE=DEVELOP;
 const GOOBLE_CONTROL_MODE=PRODUCTION;
