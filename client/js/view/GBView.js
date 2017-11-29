@@ -154,7 +154,7 @@ class GBView{
 //        $("#pendenza").html("Pendenza<br>"+app.getPendenza().toFixed(2)+"%");
         this.speedometer.drawWithInputValue(app.getActualSpeed());
 //        $("#tachimetro").html("velocità km/h<br>"+app.getActualSpeed().toFixed(1));
-        $("#contakm").html("Km<br>"+app.getKmPercorsi().toFixed(3));
+        $("#contakm").html(app.getKmPercorsi().toFixed(3)+" km<br>"+Math.round(app.quota)+" m");
 //        $("#toNextImg").html("to next panorama<br>m "+(app.getToNextPoint()>0?app.getToNextPoint().toFixed(1):0));
         if (app.mode==DEVELOP) {
             $("#cruscotto_develop").html("pendenza="+(app.getPendenza()).toFixed(2)+" | ultimo intertempo="+(app.getUltimoIntertempo()/1000).toFixed(2)+"% | velocità km/h="+app.getActualSpeed().toFixed(1));

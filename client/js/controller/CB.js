@@ -143,7 +143,9 @@ class CB{
    
     static pollSpeedFromDefaulUrl(){
 //        app.actualSpeed=5;
-//        return;
+        if(!CALLDB){
+            return;
+        }
         var p=(app.pendenza>0?app.pendenza:0);
         $.ajax(URL+parseInt(p), {
             dataType: 'json',
@@ -183,13 +185,15 @@ class CB{
     }
     
     static anglePoll(){
-        $.ajax(ANGLEURL, {
-            dataType: 'json',
-            success: function(msg, status, xhr) {
-                //msg.a è l'angolo di sterzo
-                app.updateCurrentTarget(parseInt(msg.a));                
-            }
-        });
+        if(CALLDB){
+            $.ajax(ANGLEURL, {
+                dataType: 'json',
+                success: function(msg, status, xhr) {
+                    //msg.a è l'angolo di sterzo
+                    app.updateCurrentTarget(parseInt(msg.a));                
+                }
+            });
+        }
     }
 
     static keydownHandler( event ) {

@@ -69,7 +69,7 @@ class PathFollower{
     
     goFwdStart(location,links,dir,dist){
 //        app.log("pFollw: d="+dist+"\ts="+this.sum+"\tlocation="+JSON.stringify(location));
-        console.log("pFollw: d="+dist.toFixed(3)+"\ts="+this.sum.toFixed(3)+"\tpano="+app.panorama.panorama.getLocation().pano+"\tdir="+dir.toFixed(2)+" START\ttot="+app.stradaPercorsa.toFixed(1));
+//        console.log("pFollw: d="+dist.toFixed(3)+"\ts="+this.sum.toFixed(3)+"\tpano="+app.panorama.panorama.getLocation().pano+"\tdir="+dir.toFixed(2)+" START\ttot="+app.stradaPercorsa.toFixed(1));
         this.dist=dist;
         this.currentDir=dir;
         this.currentLatLng=null;
@@ -95,7 +95,7 @@ class PathFollower{
             this.sum+=segLen;
             this.prevLatLng=location.latLng;
             this.prevPano=location.pano;
-            console.log("pFollw: d="+this.dist.toFixed(3)+"\ts="+this.sum.toFixed(3)+"\tseg="+segLen.toFixed(3)+"\tpano="+location.pano+"\tdir="+this.currentDir.toFixed(2)+"\tdLat="+dLat.toFixed(2)+"\tdLng="+dLng.toFixed(2));
+//            console.log("pFollw: d="+this.dist.toFixed(3)+"\ts="+this.sum.toFixed(3)+"\tseg="+segLen.toFixed(3)+"\tpano="+location.pano+"\tdir="+this.currentDir.toFixed(2)+"\tdLat="+dLat.toFixed(2)+"\tdLng="+dLng.toFixed(2));
         }
         else{
             //quale approssima meglio?
@@ -114,7 +114,7 @@ class PathFollower{
             }
 //            found=true;
             this.sum-=this.dist;
-            console.log("pFollw: d="+this.dist.toFixed(3)+"\ts="+this.sum.toFixed(3)+"\tseg="+segLen.toFixed(3)+"\tpano="+this.newPano+"\tdir="+app.currentDir.toFixed(2)+"\tdLat="+dLat.toFixed(2)+"\tdLng="+dLng.toFixed(2)+"\tFOUND!");
+//            console.log("pFollw: d="+this.dist.toFixed(3)+"\ts="+this.sum.toFixed(3)+"\tseg="+segLen.toFixed(3)+"\tpano="+this.newPano+"\tdir="+app.currentDir.toFixed(2)+"\tdLat="+dLat.toFixed(2)+"\tdLng="+dLng.toFixed(2)+"\tFOUND!");
             //questo sarà il nuovo panorama 
             app.panorama.movePano(this.newPano,this.newHeading,this.dist);
             return; 
@@ -151,11 +151,11 @@ class PathFollower{
 
     fwdLink(links,dir){
         dir+=app.currentTarget;
-        var s="links=";
-        for (var i=0;i<links.length;i++){
-            s+=" {"+links[i].heading.toFixed(2)+" "+links[i].pano+"}";
-        }
-        console.log(s+dir.toFixed(1));
+//        var s="links=";
+//        for (var i=0;i<links.length;i++){
+//            s+=" {"+links[i].heading.toFixed(2)+" "+links[i].pano+"}";
+//        }
+//        console.log(s+dir.toFixed(1));
         var fwd=links[0];
         var min=Math.abs(fwd.heading-dir);
         for (var i=1;i<links.length;i++){

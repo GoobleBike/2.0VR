@@ -139,17 +139,17 @@ class GooblePath {
     calcElevation(newArray, callback) {
        //this.em.debug(newArray.length);
 
-       var positionalRequest = {
-           'locations': newArray
-       };
-       app.elevation.getElevationForLocations(positionalRequest, function(results, status) {
-           //this.em.debug("entrato");
-           if (status === google.maps.ElevationStatus.OK) {
-               if (results[0]) {
-                   callback(results);
-               }else app.em.critical("Critical Error GoobleControl 0008");
-           }else app.em.critical("Critical Error GoobleControl 0009");
-        });
+//       var positionalRequest = {
+//           'locations': newArray
+//       };
+//       app.elevation.getElevationForLocations(positionalRequest, function(results, status) {
+//           //this.em.debug("entrato");
+//           if (status === google.maps.ElevationStatus.OK) {
+//               if (results[0]) {
+//                   callback(results);
+//               }else app.em.critical("Critical Error GoobleControl 0008");
+//           }else app.em.critical("Critical Error GoobleControl 0009");
+//        });
     };
     
     /**

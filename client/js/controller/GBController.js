@@ -53,11 +53,13 @@ class GBController{
         this.timerFermo;
         //la pendenza corrente
         this.pendenza=0;
+        this.quota=0;
         // filtro inclinazione
         this.inclinationFilter = new GoobleInclinationFilter();
         //ultimo intervallo di tempo tra due click
         this.ultimoIntertempo=0;
-        this.elevation = new google.maps.ElevationService();
+//        this.elevation = new google.maps.ElevationService();
+        this.elvManager=new ElevationManager();
         this.startPoint;
         this.markersArray = [];
         this.segManager=new SegmentManager();
@@ -129,6 +131,7 @@ class GBController{
         //        this.imageTimer = setInterval(this.updateImage, IMAGE_REFRESH_TIME);
                 //commuta stato
             this.goobleButtons.action(this.goobleButtons.AUTORUN);
+            this.elvManager.start(this.currentPoint);
         }
     };
 
@@ -234,10 +237,10 @@ class GBController{
             this.stradaPercorsa=0;
 //            this.lastClickTime=now;
             this.toNextPoint+=curPoint.dst;//imposta la distanza al prossimo punto
-            this.pendenza=curPoint.inc;
-            if (INCLINATION_FILTER_MODE===IF_ABSORBER) {
-              this.inclinationFilter.preset(curPoint.inc);
-            }
+//            this.pendenza=curPoint.inc;
+//            if (INCLINATION_FILTER_MODE===IF_ABSORBER) {
+//              this.inclinationFilter.preset(curPoint.inc);
+//            }
             this.view.openDashboard();
             this.view.updateDashboard();
 
@@ -314,15 +317,24 @@ class GBController{
         return curPoint;
     };
     
-    sendInclination(value) {
-        value=parseInt(value);
-        $.ajax("manageInclination.php?value=" + value, {
-            dataType: 'html',
-            success: function(data, status, xhr) {
-                //response
-            }
-        });
-    };
+//    sendInclination(value) {
+//        value=parseInt(value);
+//        $.ajax("manageInclination.php?value=" + value, {
+//            dataType: 'html',
+//            success: function(data, status, xhr) {
+//                //response
+//            }
+//        });
+//    };
+    
+    /**
+     * register new elevation and slope, update dashboard
+     * @returns {void}
+     */
+    elvUpdated(){
+        this.quota=this.elvManager.elevation;
+        this.pendenza=this.elvManager.slope;
+    }
     
     /**
      * 
@@ -433,61 +445,20 @@ moveNextDistance2(distance) {
 }
 curPointMoved(distance){
     //carica in db le coordinate del nuovo punto
+    if(CALLDB){
         $.ajax(LOCATIONURL+"&lat="+this.currentPoint.lat()+"&lng="+this.currentPoint.lng()+"&hdng="+Math.round(this.currentDir), {
             dataType: 'json',
             success: function(msg, status, xhr) {
                 //msg.a è l'angolo di sterzo               
             }
         });
+    }
     //procedi con gli altri aggiornamenti
     var percorsoFinito=false;
     this.stradaPercorsa+=distance;
     this.toNextPoint-=distance;
-    //////////////////TODO verificare
-    if (INCLINATION_FILTER_MODE===IF_ABSORBER) {
-      this.pendenza=this.inclinationFilter.update(distance);
-    }
-    //aggiorna il panorama !!già fatto!!
-//    this.panorama.refresh(this.currentPoint,this.currentDir)
     this.trace.addMarker(this.currentPoint);
     this.view.updateDashboard();
-    //estrae posizione successiva ??
-    if (false && this.toNextPoint<=0){
-      //avanza al prossimo punto
-      if (this.rideIterator.hasNext()) {
-          //ci sono ancora punti
-          var curPoint=this.moveToNext(this.rideIterator);
-//          this.rideStep++;
-          this.toNextPoint+=curPoint.dst;//imposta la distanza al prossimo punto
-          if (INCLINATION_FILTER_MODE===IF_ABSORBER) {
-            this.inclinationFilter.newPoint(curPoint.inc)
-          }
-          else {
-            this.pendenza=curPoint.inc;
-          }
-          this.view.updateDashboard();
-      }
-      else {
-          //arrivato a destinazione ferma autorun
-          this.percorsoAttivo=false;
-        clearInterval(this.autoTimer);
-        clearInterval(this.speedPoller);
-          this.goobleButtons.action(this.goobleButtons.STOP);
-//          this.clearRoute();//portato dentro a loadSegment
-          $("#splash2text").html("Congratulations !!! <br> You've completed the path:<br>"+
-                  this.presetPercorsi[this.segManager.currentSegment][2]);
-          $("#splash2").show();
-//          $("#splash").show(2000);
-//          this.view.msgFinePath();
-          percorsoFinito=true;
-//          this.loadSegment();
-            setTimeout(function(){
-                app.segManager.loadSegment();        
-            }, 5000);
-          
-      }
-//      this.view.updateDashboard();
-    }
     return percorsoFinito;
 };
 
