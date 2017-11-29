@@ -131,6 +131,107 @@ class ApiController extends Controller
 //        $items=$p;
         return 1;
     }
+    public function actionSetloc1($id,$lat,$lng,$hdng,$f=null){
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_RAW;
+        $now=date("Y-m-d H:i:s");        
+        //log
+        $log=new \app\models\Logstato();
+        $log->who='gb';
+        $log->id=$id;
+        $log->what='a';
+        $log->how=$a;
+        $log->ts=$now;
+        $log->note=$f===null?'':"FORCE";
+        if ($f===null){
+            //chek di id
+            if ($id != $this->config['gb']){
+                //id di gb non conforme
+                //salva log
+                $log->note="MISMATCH";
+                $log->save();
+                 //restituisce uno 0
+                return 0;
+            }
+        }
+        //check passato oppure f !== null (force!)
+//        $model = Stato::findOne(['who' => 'gb', 'id' => $id, 'what' => 'v']);
+        $model = Stato::findOne(['who' => 'gb', 'id' => $this->config['gb'], 'what' => 'a']);
+        $model->how=$lat;
+//        $model->how=10;
+        $model->ts=$now;
+        $model->save();
+        //log
+        $log->save();
+//        $model = Stato::findOne(['who' => 'wc', 'id' => $this->config['wc'], 'what' => 'p']);
+//        //verifica di timeout
+//        $datetime1 = new DateTime($now);
+//        $datetime2 = new DateTime($model->ts);
+//        $diff=$datetime1->getTimestamp()-$datetime2->getTimestamp();
+//        if ($diff > $this->config['wcto']){
+//            //timeout!
+//            $p=0;
+//        }
+//        else {
+//            $p=$model->how;
+//        }
+//        
+//        $items=$p;
+        return 1;
+    }
+
+    public function actionSetloc($id,$lat,$lng,$hdng,$f=null){
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_RAW;
+        $now=date("Y-m-d H:i:s");        
+        //log
+//        $log=new \app\models\Logstato();
+//        $log->who='gb';
+//        $log->id=$id;
+//        $log->what='a';
+//        $log->how=$a;
+//        $log->ts=$now;
+//        $log->note=$f===null?'':"FORCE";
+        if ($f===null){
+            //chek di id
+            if ($id != $this->config['gb']){
+                //id di gb non conforme
+//                //salva log
+//                $log->note="MISMATCH";
+//                $log->save();
+                 //restituisce uno 0
+                return 0;
+            }
+        }
+        //check passato oppure f !== null (force!)
+        $model = Stato::findOne(['who' => 'wc', 'id' => $this->config['gb'], 'what' => 'lat']);
+        $model->how=$lat;
+        $model->ts=$now;
+        $model->save();
+        $model = Stato::findOne(['who' => 'wc', 'id' => $this->config['gb'], 'what' => 'lng']);
+        $model->how=$lng;
+        $model->ts=$now;
+        $model->save();
+        $model = Stato::findOne(['who' => 'wc', 'id' => $this->config['gb'], 'what' => 'hdng']);
+        $model->how=$hdng;
+        $model->ts=$now;
+        $model->save();
+        //log
+//        $log->save();
+//        $model = Stato::findOne(['who' => 'wc', 'id' => $this->config['wc'], 'what' => 'p']);
+//        //verifica di timeout
+//        $datetime1 = new DateTime($now);
+//        $datetime2 = new DateTime($model->ts);
+//        $diff=$datetime1->getTimestamp()-$datetime2->getTimestamp();
+//        if ($diff > $this->config['wcto']){
+//            //timeout!
+//            $p=0;
+//        }
+//        else {
+//            $p=$model->how;
+//        }
+//        
+//        $items=$p;
+        return 1;
+    }
 
     public function actionSetv_getp($id,$v,$f=null){
         \Yii::$app->response->format = \yii\web\Response::FORMAT_RAW;

@@ -30,7 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <script type="text/javascript">
 $(function(){
     setInterval(eachSecond, 1000);
-    setInterval(eachQuarter, 250);
+    setInterval(eachQuarter,1000);
 });
 var s;//stato velocità
 var a;//stato angolo
@@ -100,7 +100,7 @@ $("#aplus").click(function(){
 $("#aminus").click(function(){
     as=eval($("#astato").val());
     if (as>-90){
-        s--;
+        as--;
     }    
     $("#astato").val(as);
 });
