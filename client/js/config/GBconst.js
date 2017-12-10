@@ -37,7 +37,8 @@ const DATA_REFRESH_TIME = 1000;
 const ANG_POLL_TIME=1200;//intervallo di polling per l'angolo del manubrio
 
 // costante per mappa di default
-const DEFAULT_MAP_ORIGIN="via Rizzoli,2 Bologna";
+//const DEFAULT_MAP_ORIGIN="via Rizzoli,2 Bologna";
+const DEFAULT_MAP_ORIGIN="via degli annibaldi, roma";
 
 //funzionzionalità
 const GB_1="GB 1";
@@ -66,6 +67,7 @@ LT_ANGLE_THR=-16;//soglia sinistra
 //];
 
 const PRESET_PERCORSI=[
+  ["via degli annibaldi, roma","colosseo roma","Roma"],//Piazza Malpighi
   ["Palazzo Belloni, Via Barberia, 19, 40123 Bologna","Piazza Maggiore, 40124 Bologna","Old town<br>from Palazzo Belloni<br>to PiazzaMaggiore"],//Piazza Malpighi
   ["Piazza Maggiore, 40124 Bologna","Piazza Giuseppe Verdi, 40126 Bologna","Old town<br>from Piazza Maggiore<br>to Piazza Verdi"],// Via Rizzoli e Via Zamboni
   ["Piazza Giuseppe Verdi, 40126 Bologna","Scalinata Del Pincio, Piazza XX Settembre, 40121 Bologna","Old town<br>from Piazza Verdi<br>to Piazza XX Settembre"],// Via dell'Indipendenza

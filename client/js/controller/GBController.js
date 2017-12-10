@@ -1,3 +1,5 @@
+const FREE_RIDE=false;
+
 /**
  * controller dell'MVC della web-client application Gooble Bike
  * @type type
@@ -110,6 +112,10 @@ class GBController{
         var el=document.getElementById("map")
         this.map = new google.maps.Map(el, mapOptions);
         this.view.tipoVista=VISTAMAPPA;
+        var marker= new google.maps.Marker({
+            position: originPos,
+            map: this.map,
+        });
 //        this.log("loadMap: mappa caricata")
 //        google.maps.event.addListener(map, 'click', function(mouseEvent) {
 //          //TODO non è compito di loadMap rimuovere lo splash
@@ -120,8 +126,16 @@ class GBController{
 //        });
     }
     
+    /**
+     * eseguita una sola volta all'avvio di un segmento, innesca il polling di velocità e rinfresco della vista
+     * @returns {undefined}
+     */
     autorunBySpeed() {
-        if (this.bikeRideStart()) {
+        console.log("mapOrigin="+JSON.stringify(this.mapOrigin));
+//        if (this.bikeRideStart()) {
+        if (!FREE_RIDE && this.bikeRideStart()
+        ||
+            FREE_RIDE && this.bikeFreeRideStart(this.mapOrigin)) {
             //programma click
             
         //        this.autoTimer = setTimeout(this.autoMove.bind(this), 2000);
@@ -168,25 +182,25 @@ class GBController{
         });
 
     }
-    makeRoute(start, end) {
-        new google.maps.Marker({
-            position: start,
-            map: this.map,
-        });
-
-
-//        //predispone il renderizzatore del percorso e lo associa alla mappa
-//        this.directionsDisplay.setMap(this.map); //ERRORE02
-//        //chiede la costruzione di un percorso ritardare callback
-//        this.directionsService.route(myDirections,  );
-
-    //    //N.B.:essendo stata chiamata una callback questa viene eseguita in modo asincrono
-    //    //ed il metodo termina prima che sia finita.
-    //    non è più problema, le azioni conseguenti sono tutte nella callback
-        //commuta stato
-        this.goobleButtons.action(this.goobleButtons.MAKEPATH);
-        CB.makeRoute(google.maps.DirectionsStatus.OK,);
-    }; // end makeRoute
+//    makeRoute(start, end) {
+//        new google.maps.Marker({
+//            position: start,
+//            map: this.map,
+//        });
+//
+//
+////        //predispone il renderizzatore del percorso e lo associa alla mappa
+////        this.directionsDisplay.setMap(this.map); //ERRORE02
+////        //chiede la costruzione di un percorso ritardare callback
+////        this.directionsService.route(myDirections,  );
+//
+//    //    //N.B.:essendo stata chiamata una callback questa viene eseguita in modo asincrono
+//    //    //ed il metodo termina prima che sia finita.
+//    //    non è più problema, le azioni conseguenti sono tutte nella callback
+//        //commuta stato
+//        this.goobleButtons.action(this.goobleButtons.MAKEPATH);
+//        CB.makeRoute(google.maps.DirectionsStatus.OK,);
+//    }; // end makeRoute
     makeRoute(start, end) {
         //imposta la chiamata alla googleapi, il relativo metodo di callback manipolerà i dati ricevuti
 
@@ -198,12 +212,12 @@ class GBController{
     //        travelMode: google.maps.TravelMode.BICYCLING
         };
 
-
-        //predispone il renderizzatore del percorso e lo associa alla mappa
-        this.directionsDisplay.setMap(this.map); //ERRORE02
-        //chiede la costruzione di un percorso ritardare callback
-        this.directionsService.route(myDirections, CB.makeRoute );
-
+        if (!FREE_RIDE){
+            //predispone il renderizzatore del percorso e lo associa alla mappa
+            this.directionsDisplay.setMap(this.map); //ERRORE02
+            //chiede la costruzione di un percorso ritardare callback
+            this.directionsService.route(myDirections, CB.makeRoute );
+        }
     //    //N.B.:essendo stata chiamata una callback questa viene eseguita in modo asincrono
     //    //ed il metodo termina prima che sia finita.
     //    non è più problema, le azioni conseguenti sono tutte nella callback
@@ -253,6 +267,37 @@ class GBController{
             this.em.critical("Critical Error GoobleControl 0006");
             tuttoOk=false;
         }
+        return tuttoOk;
+    };
+    
+    bikeFreeRideStart(point) {
+        var gPoint=new GooblePoint(point.lat, point.lng, 0, 0, 0, 0, 0);
+//        var gPoint=new GooblePoint(41.892810000000004, 12.49154, 0, 0, 0, 0, 0);
+        this.view.swapCruscottoOnPreloadOff();
+        var tuttoOk=true;
+        //estrae posizione iniziale
+        this.currentPoint=point;
+        this.currentDir=0;
+        this.trace.setMap(point);
+        this.ultimoIntertempo=0;
+        this.actualSpeed=20;
+        this.stradaPercorsa=0;
+        this.view.openDashboard();
+        this.view.updateDashboard();
+        this.goobleButtons.action(this.goobleButtons.RIDE);
+        this.percorsoAttivo=true;
+        //è la prima volta?
+        if (this.vistamappa===VISTAMAPPA){
+          //prima volta, istanzio panorama
+//          this.panorama=new GooblePanorama(this.trace.map,document.getElementById('map'),point,iterator.nextNoMove());
+          this.panorama=new GooblePanorama(this.trace.map,document.getElementById('map'),gPoint);
+//            this.trace.map.setStreetView(this.panorama);   
+          this.vistamappa=VISTAPANORAMA;
+        }
+//        else {
+//          //aggiorno panorama
+//          this.panorama.update(curPoint,iterator.nextNoMove());
+//        }
         return tuttoOk;
     };
     
@@ -559,11 +604,44 @@ curPointMoved(distance){
     static run(){
 //        alert("Per aumentare e diminuire velocità: tasti + e -\nPer ruotare la vista: i quattro tasti freccia")
         app.setup();
-        //carica la mappa
-//        app.log("Chiamata a loadMap");
-        app.askMap(DEFAULT_MAP_ORIGIN);
         //sovrapponi logo
         app.view.showSplash();
+        app.getStartForm();
+//        //carica la mappa
+////        app.log("Chiamata a loadMap");
+//        app.askMap(DEFAULT_MAP_ORIGIN);
+//        if (typeof app.presetPercorsi != 'undefined' && app.presetPercorsi.length>0) {
+//    //      app.em.debug("Presente");
+//            app.view.mostraPresetPercorsi(app.presetPercorsi)
+//        }
+//        app.log("running...");
+//        app.segManager.startSegment();
+//        //capture keydown
+//        $( "body" ).on( "keydown", CB.keydownHandler);
+//        app.autoAnglePoll = setInterval(CB.anglePoll, ANG_POLL_TIME);
+    }
+    
+    getStartForm(){
+//        this.run2();
+//        this.startForm=$("startForm");
+//        this.startForm.show();
+        $("#startForm").show();
+        $("#startPoint").val(this.presetPercorsi[0][0]);
+        $("#endPoint").val(this.presetPercorsi[0][1]);
+        $("#startPointButton").click(GBController.runStartForm);
+//        this.run2();
+    }
+    static runStartForm(){
+        app.presetPercorsi[0][0]=$("#startPoint").val();
+        app.presetPercorsi[0][1]=$("#endPoint").val();
+        $("#startForm").hide();
+        app.run2();
+    }
+    
+    run2(){
+            //carica la mappa
+//        app.log("Chiamata a loadMap");
+        app.askMap(DEFAULT_MAP_ORIGIN);
         if (typeof app.presetPercorsi != 'undefined' && app.presetPercorsi.length>0) {
     //      app.em.debug("Presente");
             app.view.mostraPresetPercorsi(app.presetPercorsi)
@@ -572,8 +650,7 @@ curPointMoved(distance){
         app.segManager.startSegment();
         //capture keydown
         $( "body" ).on( "keydown", CB.keydownHandler);
-        this.autoAnglePoll = setInterval(CB.anglePoll, ANG_POLL_TIME);
+        app.autoAnglePoll = setInterval(CB.anglePoll, ANG_POLL_TIME);    
     }
-    
    
 }
