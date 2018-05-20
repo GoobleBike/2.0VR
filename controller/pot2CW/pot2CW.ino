@@ -13,21 +13,20 @@
 #include <ESP8266WiFi.h>
 #include <WiFiUdp.h>
 //SSID of your network
-//char ssid[] = "********"; //SSID of your Wi-Fi router
-//char pass[] = "********"; //Password of your Wi-Fi router
 char ssid[] = "gooble"; //MFR Wi-Fi router
 char pass[] = "Loop-Gooble"; //Password MFR Wi-Fi router
 
 int remotePort = 40000;                   //Porta di servizio
 //IPAddress remoteIP={nnn,nnn,nnn,nnn};        //Numero IP of your Server
-IPAddress remoteIP={192,168,0,102};  //Numero IP MFR Server
+IPAddress remoteIP={192,168,1,102};  //Numero IP Server
 WiFiUDP Udp;
 
 //range del potenziometro
-#define MIN_INP  2
-#define MAX_INP  982
-#define MIN_OUT  -135
-#define MAX_OUT  +135
+#define MIN_INP  0
+#define MAX_INP  1024
+#define MIN_OUT  +180 //-135
+#define MAX_OUT  -180
+#define OFFSET  0
 
 //Definizione pin
 #define DEBUG D8
@@ -48,7 +47,7 @@ void setup(){
   
   //apre console 
   Serial.begin(250000);
-  delay(10);
+  delay(2000);
 
   //configura I/O
   pinMode(BUILTIN_LED,OUTPUT);
@@ -68,17 +67,26 @@ void setup(){
     Serial.println();
     Serial.print("Connecting to...");
     Serial.println(ssid);
-  }  
-  WiFi.begin(ssid, pass);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    if(debug) {
-      Serial.print(".");
+  }
+    
+  if(WiFi.status()!=WL_CONNECTED) {
+    WiFi.begin(ssid, pass);
+    while (WiFi.status() != WL_CONNECTED) {
+      delay(500);
+      if(debug) {
+        Serial.print(".");
+      }
+    }
+    if(debug){
+      Serial.println("");
+      Serial.println("Wi-Fi connected successfully");
     }
   }
-  if(debug){
-    Serial.println("");
-    Serial.println("Wi-Fi connected successfully");
+  else {
+    if(debug){
+      Serial.println("");
+      Serial.println("Wi-Fi already connected");
+    } 
   }
 
 }
@@ -90,6 +98,7 @@ void loop () {
     startTBase=micros();              //riavvia timebase
     inValue=analogRead(A0);
     angValue=map(inValue,MIN_INP,MAX_INP,MIN_OUT,MAX_OUT);
+    angValue=angValue+OFFSET;
     if(debug){
       Serial.print(inValue);
       Serial.print(" ");
